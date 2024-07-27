@@ -29,30 +29,30 @@ class InMemoryEventStoreUseCaseTest {
         var criteria = criteria(criterion(aggregateTag));
 
         var events = eventStore.read(criteria);
-        assertEquals(0L, events.head());
+        assertEquals(0L, events.consistencyMarker());
         StepVerifier.create(events.flux())
                     .verifyComplete();
 
         var evt1 = event(payload("evt1"), aggregateTag);
-        var append = eventStore.append(evt1, consistencyCondition(events.head(), criteria));
+        var append = eventStore.append(evt1, consistencyCondition(events.consistencyMarker(), criteria));
         StepVerifier.create(append)
                     .expectNext(0L)
                     .verifyComplete();
 
         events = eventStore.read(criteria);
-        assertEquals(1L, events.head());
+        assertEquals(1L, events.consistencyMarker());
         StepVerifier.create(events.flux())
                     .expectNext(sequencedEvent(0L, evt1))
                     .verifyComplete();
 
         var evt2 = event(payload("evt2"), aggregateTag);
-        append = eventStore.append(evt2, consistencyCondition(events.head(), criteria));
+        append = eventStore.append(evt2, consistencyCondition(events.consistencyMarker(), criteria));
         StepVerifier.create(append)
                     .expectNext(1L)
                     .verifyComplete();
 
         events = eventStore.read(criteria);
-        assertEquals(2L, events.head());
+        assertEquals(2L, events.consistencyMarker());
         StepVerifier.create(events.flux())
                     .expectNext(sequencedEvent(0L, evt1),
                                 sequencedEvent(1L, evt2))
@@ -72,14 +72,14 @@ class InMemoryEventStoreUseCaseTest {
         var courseCreated = event(payload("courseCreated"), courseTag);
         var studentEnrolledCourse = event(payload("studentEnrolledCourse"), studentTag, courseTag);
 
-        var head = eventStore.read(studentCriteria).head();
-        eventStore.append(studentCreated, consistencyCondition(head, studentCriteria)).block();
+        var consistencyMarker = eventStore.read(studentCriteria).consistencyMarker();
+        eventStore.append(studentCreated, consistencyCondition(consistencyMarker, studentCriteria)).block();
 
-        head = eventStore.read(courseCriteria).head();
-        eventStore.append(courseCreated, consistencyCondition(head, courseCriteria)).block();
+        consistencyMarker = eventStore.read(courseCriteria).consistencyMarker();
+        eventStore.append(courseCreated, consistencyCondition(consistencyMarker, courseCriteria)).block();
 
-        head = eventStore.read(studentCourseCriteria).head();
-        eventStore.append(studentEnrolledCourse, consistencyCondition(head, studentCourseCriteria)).block();
+        consistencyMarker = eventStore.read(studentCourseCriteria).consistencyMarker();
+        eventStore.append(studentEnrolledCourse, consistencyCondition(consistencyMarker, studentCourseCriteria)).block();
 
         StepVerifier.create(eventStore.read(studentCriteria)
                                       .flux())

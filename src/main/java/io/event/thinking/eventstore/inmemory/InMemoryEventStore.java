@@ -5,14 +5,13 @@ import io.event.thinking.eventstore.Criteria;
 import io.event.thinking.eventstore.EventStore;
 import io.event.thinking.eventstore.InvalidConsistencyConditionException;
 import io.event.thinking.eventstore.SequencedEvent;
-import io.event.thinking.eventstore.StampedEvents;
+import io.event.thinking.eventstore.MarkedEvents;
 import io.event.thinking.eventstore.Event;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Supplier;
@@ -42,14 +41,14 @@ public class InMemoryEventStore implements EventStore {
     }
 
     @Override
-    public StampedEvents read(long fromSequence, Criteria criteria) {
+    public MarkedEvents read(long fromSequence, Criteria criteria) {
         Supplier<Flux<SequencedEvent>> sourced =
                 () -> Flux.fromStream(events.tailMap(fromSequence)
                                             .entrySet()
                                             .stream()
                                             .filter(entry -> criteria.matches(entry.getValue().tags()))
                                             .map(SequencedEvent::sequencedEvent));
-        return new StampedEvents(head(), Flux.defer(sourced));
+        return new MarkedEvents(head(), Flux.defer(sourced));
     }
 
     /**

@@ -130,7 +130,7 @@ class InMemoryEventStoreTest {
     void readFromEmptyEventStore() {
         var source = eventStore.read(criteria(criterion(tag("key", "value"))));
 
-        assertEquals(0L, source.head());
+        assertEquals(0L, source.consistencyMarker());
         StepVerifier.create(source.flux())
                     .verifyComplete();
     }
@@ -152,7 +152,7 @@ class InMemoryEventStoreTest {
                     .verifyComplete();
 
         var source1 = eventStore.read(criteria(criterion(tag1)));
-        assertEquals(5L, source1.head());
+        assertEquals(5L, source1.consistencyMarker());
         StepVerifier.create(source1.flux())
                     .expectNext(sequencedEvent(0L, event1),
                                 sequencedEvent(2L, event1),
@@ -163,7 +163,7 @@ class InMemoryEventStoreTest {
                     .expectNext(5L)
                     .verifyComplete();
         var source2 = eventStore.read(criteria(criterion(tag2)));
-        assertEquals(6L, source2.head());
+        assertEquals(6L, source2.consistencyMarker());
         StepVerifier.create(source2.flux())
                     .expectNext(sequencedEvent(1L, event2),
                                 sequencedEvent(4L, event2),
@@ -220,7 +220,7 @@ class InMemoryEventStoreTest {
     }
 
     @Test
-    void readFromInvalidSeq() throws Throwable {
+    void readFromInvalidSeq() {
         var tag = tag("key", "value");
         var event1 = event(payload("event1"), tag);
         var event2 = event(payload("event2"), tag);

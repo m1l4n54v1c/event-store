@@ -3,7 +3,6 @@ package io.event.thinking.eventstore;
 import reactor.core.publisher.Mono;
 
 import static io.event.thinking.eventstore.Criteria.criteria;
-import static io.event.thinking.eventstore.Event.event;
 import static java.util.Collections.emptySet;
 
 /**
@@ -13,14 +12,14 @@ public interface EventStore {
 
     /**
      * Queries the Event Store for events based on the given {@code criteria} starting from the given {@code sequence}.
-     * At the time this query is issued, the Event Store captures the head of itself and packages it as a stamp
-     * ({@link StampedEvents#head()}) in the resulting series of events.
+     * At the time this query is issued, the Event Store captures the consistencyMarker of itself and packages it as a
+     * {@link MarkedEvents#consistencyMarker()} in the resulting series of events.
      *
      * @param fromSequence the inclusive starting sequence of the query
      * @param criteria     the criteria used to filter events
-     * @return events with the current head of the Event Store
+     * @return events with the current consistencyMarker of the Event Store
      */
-    StampedEvents read(long fromSequence, Criteria criteria);
+    MarkedEvents read(long fromSequence, Criteria criteria);
 
     /**
      * Conditionally appends the {@code event} to this Event Store depending on the provided
@@ -36,31 +35,31 @@ public interface EventStore {
     Mono<Long> append(Event event, ConsistencyCondition consistencyCondition);
 
     /**
-     * Returns all events in the Event Store with the current head.
+     * Returns all events in the Event Store with the current consistencyMarker.
      *
-     * @return events with the current head of the Event Store
+     * @return events with the current consistencyMarker of the Event Store
      */
-    default StampedEvents read() {
+    default MarkedEvents read() {
         return read(0L);
     }
 
     /**
-     * Returns all the events starting {@code fromSequence} inclusively with the current head.
+     * Returns all the events starting {@code fromSequence} inclusively with the current consistencyMarker.
      *
      * @param fromSequence inclusive starting sequence
-     * @return events with the current head of the Event Store
+     * @return events with the current consistencyMarker of the Event Store
      */
-    default StampedEvents read(long fromSequence) {
+    default MarkedEvents read(long fromSequence) {
         return read(fromSequence, criteria(emptySet()));
     }
 
     /**
-     * Queries the Event Store for events based on the given {@code criteria} with the current head.
+     * Queries the Event Store for events based on the given {@code criteria} with the current consistencyMarker.
      *
      * @param criteria the criteria used to filter events
-     * @return events with the current head of the Event Store
+     * @return events with the current consistencyMarker of the Event Store
      */
-    default StampedEvents read(Criteria criteria) {
+    default MarkedEvents read(Criteria criteria) {
         return read(0L, criteria);
     }
 
