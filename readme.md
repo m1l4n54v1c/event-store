@@ -32,7 +32,7 @@ The best way to understand how criteria-based filtering works is to use an examp
 can enroll a Course. There are events for student and course creation, renaming the course, course capacity change, and
 an event that student enrolled the course. The event stream is depicted in the image below.
 
-![img.png](img.png)
+![img.jpg](img.jpg)
 
 All these events are tagged with specific Domain Identifiers (tags). Certain events, like the fact that student
 subscribed to a course, are tagged with two tags - student and the course. The reason is that this event belongs to
