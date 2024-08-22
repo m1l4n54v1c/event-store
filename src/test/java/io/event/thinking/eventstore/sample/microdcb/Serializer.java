@@ -1,20 +1,17 @@
-package io.event.thinking.eventstore.sample;
-
-import io.event.thinking.eventstore.Event;
+package io.event.thinking.eventstore.sample.microdcb;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 
-public interface SerializableEvent extends Serializable {
+public interface Serializer {
 
-    default byte[] serialize() {
+    default byte[] serialize(Object obj) {
         var bos = new ByteArrayOutputStream();
 
         try (var out = new ObjectOutputStream(bos)) {
-            out.writeObject(this);
+            out.writeObject(obj);
             out.flush();
             return bos.toByteArray();
         } catch (Exception ex) {
@@ -22,13 +19,11 @@ public interface SerializableEvent extends Serializable {
         }
     }
 
-    Event toEvent();
-
-    static <T> T deserialize(byte[] bytes) {
+    default Object deserialize(byte[] bytes) {
         var bis = new ByteArrayInputStream(bytes);
 
         try (var in = new ObjectInputStream(bis)) {
-            return (T) in.readObject();
+            return in.readObject();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

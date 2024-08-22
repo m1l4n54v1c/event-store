@@ -2,21 +2,40 @@ package io.event.thinking.eventstore.sample;
 
 import io.event.thinking.eventstore.EventStore;
 import io.event.thinking.eventstore.inmemory.InMemoryEventStore;
+import io.event.thinking.eventstore.sample.api.event.CourseCreated;
+import io.event.thinking.eventstore.sample.api.event.StudentEnrolledFaculty;
+import io.event.thinking.eventstore.sample.api.event.StudentSubscribed;
+import io.event.thinking.eventstore.sample.api.command.SubscribeStudent;
+import io.event.thinking.eventstore.sample.api.command.UnsubscribeStudent;
+import io.event.thinking.eventstore.sample.microdcb.Serializer;
+import io.event.thinking.eventstore.sample.microdcb.SimpleCommandDispatcher;
+import io.event.thinking.eventstore.sample.model.SubscribeStudentCommandModel;
+import io.event.thinking.eventstore.sample.model.UnsubscribeStudentCommandModel;
 import org.junit.jupiter.api.*;
 import reactor.test.StepVerifier;
 
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import static io.event.thinking.eventstore.Event.event;
+import static io.event.thinking.eventstore.Tag.tag;
+import static io.event.thinking.eventstore.sample.model.Constants.COURSE_ID;
+import static io.event.thinking.eventstore.sample.model.Constants.STUDENT_ID;
+import static io.event.thinking.eventstore.sample.microdcb.TagUtils.type;
+
 class FacultyTest {
 
+    private final Serializer serializer = new Serializer() {
+    };
     private EventStore eventStore;
-    private SubscriptionCommandHandler commandHandler;
+    private SimpleCommandDispatcher commandHandler;
 
     @BeforeEach
     void setUp() {
         eventStore = new InMemoryEventStore();
-        commandHandler = new SubscriptionCommandHandler(eventStore);
+        commandHandler = new SimpleCommandDispatcher(eventStore);
+        commandHandler.register(SubscribeStudent.class, SubscribeStudentCommandModel::new);
+        commandHandler.register(UnsubscribeStudent.class, UnsubscribeStudentCommandModel::new);
     }
 
     @Test
@@ -24,7 +43,7 @@ class FacultyTest {
         var studentId = enrollStudent();
         var courseId = createCourse();
 
-        StepVerifier.create(commandHandler.handle(new SubscribeStudent(studentId, courseId)))
+        StepVerifier.create(commandHandler.dispatch(new SubscribeStudent(studentId, courseId)))
                     .expectNext(2L)
                     .verifyComplete();
     }
@@ -35,7 +54,7 @@ class FacultyTest {
         var courseId = createCourse();
         subscribe(studentId, courseId);
 
-        StepVerifier.create(commandHandler.handle(new SubscribeStudent(studentId, courseId)))
+        StepVerifier.create(commandHandler.dispatch(new SubscribeStudent(studentId, courseId)))
                     .verifyErrorMessage("Student already subscribed to this course");
     }
 
@@ -48,7 +67,7 @@ class FacultyTest {
         subscribe(student1Id, courseId);
         subscribe(student2Id, courseId);
 
-        StepVerifier.create(commandHandler.handle(new SubscribeStudent(student3Id, courseId)))
+        StepVerifier.create(commandHandler.dispatch(new SubscribeStudent(student3Id, courseId)))
                     .verifyErrorMessage("Course is fully booked");
     }
 
@@ -60,7 +79,7 @@ class FacultyTest {
                  .mapToObj(i -> createCourse())
                  .forEach(courseId -> subscribe(studentId, courseId));
 
-        StepVerifier.create(commandHandler.handle(new SubscribeStudent(studentId, targetCourseId)))
+        StepVerifier.create(commandHandler.dispatch(new SubscribeStudent(studentId, targetCourseId)))
                     .verifyErrorMessage("Student subscribed to too many courses");
     }
 
@@ -69,7 +88,7 @@ class FacultyTest {
         var studentId = UUID.randomUUID().toString();
         var courseId = createCourse();
 
-        StepVerifier.create(commandHandler.handle(new SubscribeStudent(studentId, courseId)))
+        StepVerifier.create(commandHandler.dispatch(new SubscribeStudent(studentId, courseId)))
                     .verifyErrorMessage("Student with given id never enrolled the faculty");
     }
 
@@ -78,13 +97,15 @@ class FacultyTest {
         var studentId = enrollStudent();
         var courseId = UUID.randomUUID().toString();
 
-        StepVerifier.create(commandHandler.handle(new SubscribeStudent(studentId, courseId)))
+        StepVerifier.create(commandHandler.dispatch(new SubscribeStudent(studentId, courseId)))
                     .verifyErrorMessage("Course with given id does not exist");
     }
 
     private String enrollStudent() {
         var studentId = UUID.randomUUID().toString();
-        eventStore.append(new StudentEnrolled(studentId, "Name", "Lastname").toEvent())
+        eventStore.append(event(serializer.serialize(new StudentEnrolledFaculty(studentId, "Name", "Lastname")),
+                                type(StudentEnrolledFaculty.NAME),
+                                tag(STUDENT_ID, studentId)))
                   .block();
         return studentId;
     }
@@ -95,13 +116,18 @@ class FacultyTest {
 
     private String createCourse(int capacity) {
         var courseId = UUID.randomUUID().toString();
-        eventStore.append(new CourseCreated(courseId, capacity).toEvent())
+        eventStore.append(event(serializer.serialize(new CourseCreated(courseId, capacity)),
+                                type(CourseCreated.NAME),
+                                tag(COURSE_ID, courseId)))
                   .block();
         return courseId;
     }
 
     private void subscribe(String studentId, String courseId) {
-        eventStore.append(new StudentSubscribed(studentId, courseId).toEvent())
+        eventStore.append(event(serializer.serialize(new StudentSubscribed(studentId, courseId)),
+                                type(StudentSubscribed.NAME),
+                                tag(STUDENT_ID, studentId),
+                                tag(COURSE_ID, courseId)))
                   .block();
     }
 }
