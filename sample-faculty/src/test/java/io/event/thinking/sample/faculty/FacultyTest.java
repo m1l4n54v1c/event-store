@@ -1,6 +1,6 @@
 package io.event.thinking.sample.faculty;
 
-import io.event.thinking.eventstore.EventStore;
+import io.event.thinking.eventstore.api.EventStore;
 import io.event.thinking.eventstore.inmemory.InMemoryEventStore;
 import io.event.thinking.micro.modeling.Serializer;
 import io.event.thinking.micro.modeling.SimpleCommandDispatcher;
@@ -17,8 +17,8 @@ import reactor.test.StepVerifier;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import static io.event.thinking.eventstore.Event.event;
-import static io.event.thinking.eventstore.Tag.tag;
+import static io.event.thinking.eventstore.api.Event.event;
+import static io.event.thinking.eventstore.api.Tag.tag;
 import static io.event.thinking.micro.modeling.Tags.type;
 import static io.event.thinking.sample.faculty.model.Constants.COURSE_ID;
 import static io.event.thinking.sample.faculty.model.Constants.STUDENT_ID;

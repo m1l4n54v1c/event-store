@@ -1,7 +1,7 @@
 package io.event.thinking.micro.modeling;
 
-import io.event.thinking.eventstore.EventStore;
-import io.event.thinking.eventstore.SequencedEvent;
+import io.event.thinking.eventstore.api.EventStore;
+import io.event.thinking.eventstore.api.SequencedEvent;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import static io.event.thinking.eventstore.ConsistencyCondition.consistencyCondition;
-import static io.event.thinking.eventstore.Event.event;
+import static io.event.thinking.eventstore.api.ConsistencyCondition.consistencyCondition;
+import static io.event.thinking.eventstore.api.Event.event;
 
 /**
  * Dispatches a command to a CommandModel.
@@ -61,18 +61,18 @@ public class SimpleCommandDispatcher implements CommandDispatcher {
         handlers.put(commandType, model::get);
     }
 
-    private Event deserialize(io.event.thinking.eventstore.Event e) {
+    private Event deserialize(io.event.thinking.eventstore.api.Event e) {
         Object payload = serializer.deserialize(e.payload());
         return Event.event(e.tags(), payload);
     }
 
-    private List<io.event.thinking.eventstore.Event> serialize(List<Event> events) {
+    private List<io.event.thinking.eventstore.api.Event> serialize(List<Event> events) {
         return events.stream()
                      .map(this::serialize)
                      .toList();
     }
 
-    private io.event.thinking.eventstore.Event serialize(Event e) {
+    private io.event.thinking.eventstore.api.Event serialize(Event e) {
         byte[] payload = serializer.serialize(e.payload());
         return event(e.tags(), payload);
     }

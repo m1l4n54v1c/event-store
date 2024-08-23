@@ -1,6 +1,6 @@
 package io.event.thinking.sample.faculty.model;
 
-import io.event.thinking.eventstore.Criteria;
+import io.event.thinking.eventstore.api.Criteria;
 import io.event.thinking.micro.modeling.CommandModel;
 import io.event.thinking.micro.modeling.Event;
 import io.event.thinking.sample.faculty.api.command.UnsubscribeStudent;
@@ -9,9 +9,9 @@ import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 
 import java.util.List;
 
-import static io.event.thinking.eventstore.Criteria.criteria;
-import static io.event.thinking.eventstore.Criterion.criterion;
-import static io.event.thinking.eventstore.Tag.tag;
+import static io.event.thinking.eventstore.api.Criteria.criteria;
+import static io.event.thinking.eventstore.api.Criterion.criterion;
+import static io.event.thinking.eventstore.api.Tag.tag;
 import static io.event.thinking.micro.modeling.Event.event;
 import static io.event.thinking.micro.modeling.Tags.type;
 import static io.event.thinking.sample.faculty.model.Constants.COURSE_ID;

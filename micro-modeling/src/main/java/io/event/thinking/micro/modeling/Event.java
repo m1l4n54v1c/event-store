@@ -1,6 +1,6 @@
 package io.event.thinking.micro.modeling;
 
-import io.event.thinking.eventstore.Tag;
+import io.event.thinking.eventstore.api.Tag;
 
 import java.util.Set;
 

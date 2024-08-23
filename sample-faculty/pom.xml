@@ -25,7 +25,12 @@
 
         <dependency>
             <groupId>io.event.thinking</groupId>
-            <artifactId>store</artifactId>
+            <artifactId>event-store-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.event.thinking</groupId>
+            <artifactId>inmemory-event-store</artifactId>
         </dependency>
 
         <dependency>

@@ -9,9 +9,10 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>store</module>
+        <module>inmemory-event-store</module>
         <module>micro-modeling</module>
         <module>sample-faculty</module>
+        <module>event-store-api</module>
     </modules>
 
     <properties>
@@ -26,7 +27,13 @@
         <dependencies>
             <dependency>
                 <groupId>io.event.thinking</groupId>
-                <artifactId>store</artifactId>
+                <artifactId>event-store-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.event.thinking</groupId>
+                <artifactId>inmemory-event-store</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

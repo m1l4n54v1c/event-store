@@ -1,7 +1,6 @@
 package io.event.thinking.micro.modeling;
 
-import io.event.thinking.eventstore.Criteria;
-import reactor.core.publisher.Flux;
+import io.event.thinking.eventstore.api.Criteria;
 
 import java.util.List;
 

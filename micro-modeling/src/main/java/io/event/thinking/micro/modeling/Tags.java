@@ -1,8 +1,8 @@
 package io.event.thinking.micro.modeling;
 
-import io.event.thinking.eventstore.Tag;
+import io.event.thinking.eventstore.api.Tag;
 
-import static io.event.thinking.eventstore.Tag.tag;
+import static io.event.thinking.eventstore.api.Tag.tag;
 
 public class Tags {
 
