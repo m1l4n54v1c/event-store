@@ -1,11 +1,13 @@
 package io.event.thinking.micro.modeling;
 
+import io.event.thinking.eventstore.api.Criteria;
 import io.event.thinking.eventstore.api.EventStore;
 import io.event.thinking.eventstore.api.SequencedEvent;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
@@ -18,7 +20,7 @@ import static io.event.thinking.eventstore.api.Event.event;
 public class SimpleCommandDispatcher implements CommandDispatcher {
 
     @SuppressWarnings("rawtypes")
-    private final Map<Class, Supplier<CommandModel>> handlers = new ConcurrentHashMap<>();
+    private final Map<Class, Supplier<CommandModel>> modelFactories = new ConcurrentHashMap<>();
     private final EventStore eventStore;
     private final Serializer serializer;
 
@@ -34,31 +36,32 @@ public class SimpleCommandDispatcher implements CommandDispatcher {
 
     @Override
     public <T> Mono<Long> dispatch(T cmd) {
-        @SuppressWarnings("unchecked")
-        CommandModel<T> commandModel = (CommandModel<T>) handlers.get(cmd.getClass()).get();
-        var criteria = commandModel.criteria(cmd);
+        //noinspection unchecked
+        return Mono.just(Optional.ofNullable(modelFactories.get(cmd.getClass()))
+                                 .orElseThrow(() -> new RuntimeException("No model found for " + cmd.getClass())))
+                   // create fresh command model
+                   .map(factory -> (CommandModel<T>) factory.get())
+                   .flatMap(model -> sourceTheModelAndHandleTheCommand(model, cmd));
+    }
+
+    private <T> Mono<Long> sourceTheModelAndHandleTheCommand(CommandModel<T> model, T cmd) {
+        var criteria = model.criteria(cmd);
         // source events
         var result = eventStore.read(criteria);
+        // keep consistency marker
+        var consistencyMarker = result.consistencyMarker();
         return result.flux()
                      .map(SequencedEvent::event)
-                     // deserialization
                      .map(this::deserialize)
-                     // build the command model based on sourced events
-                     .reduce(commandModel, (c, e) -> {
-                         c.onEvent(e);
-                         return c;
-                     })
-                     // handle the command
-                     .map(model -> model.handle(cmd))
-                     // serialize
+                     .reduce(model, this::applyEvent)
+                     .map(sourcedModel -> sourcedModel.handle(cmd))
                      .map(this::serialize)
-                     // publish the events
-                     .flatMap(e -> eventStore.append(e, consistencyCondition(result.consistencyMarker(), criteria)));
+                     .flatMap(events -> publishEvents(events, consistencyMarker, criteria));
     }
 
     @Override
     public <T> void register(Class<T> commandType, Supplier<CommandModel<T>> model) {
-        handlers.put(commandType, model::get);
+        modelFactories.put(commandType, model::get);
     }
 
     private Event deserialize(io.event.thinking.eventstore.api.Event e) {
@@ -75,5 +78,16 @@ public class SimpleCommandDispatcher implements CommandDispatcher {
     private io.event.thinking.eventstore.api.Event serialize(Event e) {
         byte[] payload = serializer.serialize(e.payload());
         return event(e.tags(), payload);
+    }
+
+    private <T> CommandModel<T> applyEvent(CommandModel<T> model, Event event) {
+        model.onEvent(event);
+        return model;
+    }
+
+    private Mono<Long> publishEvents(List<io.event.thinking.eventstore.api.Event> events,
+                                     long consistencyMarker,
+                                     Criteria criteria) {
+        return eventStore.append(events, consistencyCondition(consistencyMarker, criteria));
     }
 }
