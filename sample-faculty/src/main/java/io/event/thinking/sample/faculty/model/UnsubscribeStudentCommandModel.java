@@ -9,7 +9,6 @@ import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 
 import java.util.List;
 
-import static io.event.thinking.eventstore.api.Criteria.criteria;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.eventstore.api.Tag.tag;
 import static io.event.thinking.micro.modeling.Event.event;
@@ -22,13 +21,13 @@ public class UnsubscribeStudentCommandModel implements CommandModel<UnsubscribeS
     private boolean subscribed = false;
 
     @Override
-    public Criteria buildCriteria(UnsubscribeStudent cmd) {
-        return criteria(criterion(type(StudentSubscribed.NAME),
-                                  tag(STUDENT_ID, cmd.studentId()),
-                                  tag(COURSE_ID, cmd.courseId())),
-                        criterion(type(StudentUnsubscribed.NAME),
-                                  tag(STUDENT_ID, cmd.studentId()),
-                                  tag(COURSE_ID, cmd.courseId()))
+    public Criteria criteria(UnsubscribeStudent cmd) {
+        return Criteria.criteria(criterion(type(StudentSubscribed.NAME),
+                                           tag(STUDENT_ID, cmd.studentId()),
+                                           tag(COURSE_ID, cmd.courseId())),
+                                 criterion(type(StudentUnsubscribed.NAME),
+                                           tag(STUDENT_ID, cmd.studentId()),
+                                           tag(COURSE_ID, cmd.courseId()))
         );
     }
 

@@ -12,7 +12,6 @@ import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 
 import java.util.List;
 
-import static io.event.thinking.eventstore.api.Criteria.criteria;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.eventstore.api.Tag.tag;
 import static io.event.thinking.micro.modeling.Event.event;
@@ -52,14 +51,14 @@ public class SubscribeStudentCommandModel implements CommandModel<SubscribeStude
     }
 
     @Override
-    public Criteria buildCriteria(SubscribeStudent cmd) {
-        return criteria(criterion(type(StudentEnrolledFaculty.NAME), tag(STUDENT_ID, cmd.studentId())),
-                        criterion(type(CourseCreated.NAME), tag(COURSE_ID, cmd.courseId())),
-                        criterion(type(CourseCapacityChanged.NAME), tag(COURSE_ID, cmd.courseId())),
-                        criterion(type(StudentSubscribed.NAME), tag(COURSE_ID, cmd.courseId())),
-                        criterion(type(StudentSubscribed.NAME), tag(STUDENT_ID, cmd.studentId())),
-                        criterion(type(StudentUnsubscribed.NAME), tag(COURSE_ID, cmd.courseId())),
-                        criterion(type(StudentUnsubscribed.NAME), tag(STUDENT_ID, cmd.studentId())));
+    public Criteria criteria(SubscribeStudent cmd) {
+        return Criteria.criteria(criterion(type(StudentEnrolledFaculty.NAME), tag(STUDENT_ID, cmd.studentId())),
+                                 criterion(type(CourseCreated.NAME), tag(COURSE_ID, cmd.courseId())),
+                                 criterion(type(CourseCapacityChanged.NAME), tag(COURSE_ID, cmd.courseId())),
+                                 criterion(type(StudentSubscribed.NAME), tag(COURSE_ID, cmd.courseId())),
+                                 criterion(type(StudentSubscribed.NAME), tag(STUDENT_ID, cmd.studentId())),
+                                 criterion(type(StudentUnsubscribed.NAME), tag(COURSE_ID, cmd.courseId())),
+                                 criterion(type(StudentUnsubscribed.NAME), tag(STUDENT_ID, cmd.studentId())));
     }
 
 

@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface CommandModel<T> {
 
-    Criteria buildCriteria(T command);
+    Criteria criteria(T command);
 
     void onEvent(Event event);
 

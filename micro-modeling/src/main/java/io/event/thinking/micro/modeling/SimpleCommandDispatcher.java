@@ -36,7 +36,7 @@ public class SimpleCommandDispatcher implements CommandDispatcher {
     public <T> Mono<Long> dispatch(T cmd) {
         @SuppressWarnings("unchecked")
         CommandModel<T> commandModel = (CommandModel<T>) handlers.get(cmd.getClass()).get();
-        var criteria = commandModel.buildCriteria(cmd);
+        var criteria = commandModel.criteria(cmd);
         // source events
         var result = eventStore.read(criteria);
         return result.flux()
