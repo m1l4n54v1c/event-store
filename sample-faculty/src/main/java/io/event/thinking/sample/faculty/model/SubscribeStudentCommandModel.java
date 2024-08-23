@@ -9,7 +9,8 @@ import io.event.thinking.sample.faculty.api.event.CourseCreated;
 import io.event.thinking.sample.faculty.api.event.StudentEnrolledFaculty;
 import io.event.thinking.sample.faculty.api.event.StudentSubscribed;
 import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
-import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 import static io.event.thinking.eventstore.Criteria.criteria;
 import static io.event.thinking.eventstore.Criterion.criterion;
@@ -31,23 +32,23 @@ public class SubscribeStudentCommandModel implements CommandModel<SubscribeStude
     private boolean alreadySubscribed;
 
     @Override
-    public Flux<Event> handle(SubscribeStudent cmd) {
+    public List<Event> handle(SubscribeStudent cmd) {
         if (studentId == null) {
-            return Flux.error(new RuntimeException("Student with given id never enrolled the faculty"));
+            throw new RuntimeException("Student with given id never enrolled the faculty");
         }
         if (courseId == null) {
-            return Flux.error(new RuntimeException("Course with given id does not exist"));
+            throw new RuntimeException("Course with given id does not exist");
         }
         if (alreadySubscribed) {
-            return Flux.error(new RuntimeException("Student already subscribed to this course"));
+            throw new RuntimeException("Student already subscribed to this course");
         }
         if (noOfStudentsSubscribedToCourse == courseCapacity) {
-            return Flux.error(new RuntimeException("Course is fully booked"));
+            throw new RuntimeException("Course is fully booked");
         }
         if (noOfCoursesStudentSubscribed == MAX_COURSES_PER_STUDENT) {
-            return Flux.error(new RuntimeException("Student subscribed to too many courses"));
+            throw new RuntimeException("Student subscribed to too many courses");
         }
-        return Flux.just(tagEvent(new StudentSubscribed(studentId, courseId)));
+        return List.of(tagEvent(new StudentSubscribed(studentId, courseId)));
     }
 
     @Override

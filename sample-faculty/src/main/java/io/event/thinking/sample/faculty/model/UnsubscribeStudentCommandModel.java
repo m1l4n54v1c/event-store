@@ -1,12 +1,13 @@
 package io.event.thinking.sample.faculty.model;
 
 import io.event.thinking.eventstore.Criteria;
-import io.event.thinking.sample.faculty.api.event.StudentSubscribed;
-import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
-import io.event.thinking.sample.faculty.api.command.UnsubscribeStudent;
 import io.event.thinking.micro.modeling.CommandModel;
 import io.event.thinking.micro.modeling.Event;
-import reactor.core.publisher.Flux;
+import io.event.thinking.sample.faculty.api.command.UnsubscribeStudent;
+import io.event.thinking.sample.faculty.api.event.StudentSubscribed;
+import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
+
+import java.util.List;
 
 import static io.event.thinking.eventstore.Criteria.criteria;
 import static io.event.thinking.eventstore.Criterion.criterion;
@@ -40,11 +41,11 @@ public class UnsubscribeStudentCommandModel implements CommandModel<UnsubscribeS
     }
 
     @Override
-    public Flux<Event> handle(UnsubscribeStudent cmd) {
+    public List<Event> handle(UnsubscribeStudent cmd) {
         if (subscribed) {
-            return Flux.just(tagEvent(new StudentUnsubscribed(cmd.studentId(), cmd.courseId())));
+            return List.of(tagEvent(new StudentUnsubscribed(cmd.studentId(), cmd.courseId())));
         }
-        return Flux.error(new RuntimeException("Student is not subscribed to course"));
+        throw new RuntimeException("Student is not subscribed to course");
     }
 
     private static Event tagEvent(StudentUnsubscribed event) {

@@ -2,6 +2,8 @@ package io.event.thinking.eventstore;
 
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 import static io.event.thinking.eventstore.Criteria.criteria;
 import static java.util.Collections.emptySet;
 
@@ -32,7 +34,22 @@ public interface EventStore {
      * {@link InvalidConsistencyConditionException}.
      * @see ConsistencyCondition
      */
-    Mono<Long> append(Event event, ConsistencyCondition consistencyCondition);
+    default Mono<Long> append(Event event, ConsistencyCondition consistencyCondition) {
+        return append(List.of(event), consistencyCondition);
+    }
+
+    /**
+     * Conditionally appends the {@code events} to this Event Store depending on the provided
+     * {@code consistencyCondition}.
+     *
+     * @param events               events to be stored
+     * @param consistencyCondition the consistency condition used to validate the append
+     * @return successful {@link Mono} with the global sequence of the first stored event if the append was successful.
+     * In case the provided {@code consistencyCondition} was not met, it returns errored {@link Mono} with
+     * {@link InvalidConsistencyConditionException}.
+     * @see ConsistencyCondition
+     */
+    Mono<Long> append(List<Event> events, ConsistencyCondition consistencyCondition);
 
     /**
      * Returns all events in the Event Store with the current consistencyMarker.

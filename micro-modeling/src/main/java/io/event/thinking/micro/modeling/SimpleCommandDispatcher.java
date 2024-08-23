@@ -4,6 +4,7 @@ import io.event.thinking.eventstore.EventStore;
 import io.event.thinking.eventstore.SequencedEvent;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -48,12 +49,11 @@ public class SimpleCommandDispatcher implements CommandDispatcher {
                          return c;
                      })
                      // handle the command
-                     .flatMapMany(model -> model.handle(cmd))
+                     .map(model -> model.handle(cmd))
                      // serialize
                      .map(this::serialize)
                      // publish the events
-                     .flatMap(e -> eventStore.append(e, consistencyCondition(result.consistencyMarker(), criteria)))
-                     .last();
+                     .flatMap(e -> eventStore.append(e, consistencyCondition(result.consistencyMarker(), criteria)));
     }
 
     @Override
@@ -64,6 +64,12 @@ public class SimpleCommandDispatcher implements CommandDispatcher {
     private Event deserialize(io.event.thinking.eventstore.Event e) {
         Object payload = serializer.deserialize(e.payload());
         return Event.event(e.tags(), payload);
+    }
+
+    private List<io.event.thinking.eventstore.Event> serialize(List<Event> events) {
+        return events.stream()
+                     .map(this::serialize)
+                     .toList();
     }
 
     private io.event.thinking.eventstore.Event serialize(Event e) {

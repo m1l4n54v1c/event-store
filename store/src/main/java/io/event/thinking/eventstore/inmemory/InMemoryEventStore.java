@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.List;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Supplier;
@@ -35,8 +36,8 @@ public class InMemoryEventStore implements EventStore {
     private final Scheduler appender = Schedulers.single();
 
     @Override
-    public Mono<Long> append(Event event, ConsistencyCondition consistencyCondition) {
-        return Mono.fromSupplier(() -> doAppend(event, consistencyCondition))
+    public Mono<Long> append(List<Event> events, ConsistencyCondition consistencyCondition) {
+        return Mono.fromSupplier(() -> doAppend(events, consistencyCondition))
                    .subscribeOn(appender);
     }
 
@@ -55,14 +56,14 @@ public class InMemoryEventStore implements EventStore {
      * Does the actual append to the in-memory data structure. No need for any synchronization mechanism since appending
      * is done in a single thread.
      */
-    private long doAppend(Event event, ConsistencyCondition consistencyCondition) {
+    private long doAppend(List<Event> events, ConsistencyCondition consistencyCondition) {
         if (consistencyCondition != null && !validate(consistencyCondition)) {
             throw new InvalidConsistencyConditionException();
         }
 
-        long globalSequence = head();
-        events.put(globalSequence, event);
-        return globalSequence;
+        long globalSequenceOfFirst = head();
+        events.forEach(e -> this.events.put(head(), e));
+        return globalSequenceOfFirst;
     }
 
     /**
