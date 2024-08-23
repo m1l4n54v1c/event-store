@@ -20,7 +20,7 @@
     <dependencies>
         <dependency>
             <groupId>io.event.thinking</groupId>
-            <artifactId>micro-modeling</artifactId>
+            <artifactId>micro-es</artifactId>
         </dependency>
 
         <dependency>

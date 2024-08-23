@@ -1,4 +1,4 @@
-package io.event.thinking.micro.modeling;
+package io.event.thinking.micro.es;
 
 import io.event.thinking.eventstore.api.Criteria;
 import io.event.thinking.eventstore.api.EventStore;
@@ -15,33 +15,44 @@ import static io.event.thinking.eventstore.api.ConsistencyCondition.consistencyC
 import static io.event.thinking.eventstore.api.Event.event;
 
 /**
- * Dispatches a command to a CommandModel.
+ * The implementation of {@link CommandBus} that keeps models locally.
  */
-public class SimpleCommandDispatcher implements CommandDispatcher {
+public class LocalCommandBus implements CommandBus {
 
     @SuppressWarnings("rawtypes")
     private final Map<Class, Supplier<CommandModel>> modelFactories = new ConcurrentHashMap<>();
     private final EventStore eventStore;
     private final Serializer serializer;
 
-    public SimpleCommandDispatcher(EventStore eventStore) {
+    /**
+     * Instantiates this bus with the given {@code eventStore} and uses Java serializer.
+     *
+     * @param eventStore the event store
+     */
+    public LocalCommandBus(EventStore eventStore) {
         this(eventStore, new Serializer() {
         });
     }
 
-    public SimpleCommandDispatcher(EventStore eventStore, Serializer serializer) {
+    /**
+     * Instantiates this bus with the given {@code eventStore} and {@code serializer}.
+     *
+     * @param eventStore the event store
+     * @param serializer the serializer
+     */
+    public LocalCommandBus(EventStore eventStore, Serializer serializer) {
         this.eventStore = eventStore;
         this.serializer = serializer;
     }
 
     @Override
-    public <T> Mono<Long> dispatch(T cmd) {
+    public <T> Mono<Long> dispatch(T command) {
         //noinspection unchecked
-        return Mono.just(Optional.ofNullable(modelFactories.get(cmd.getClass()))
-                                 .orElseThrow(() -> new RuntimeException("No model found for " + cmd.getClass())))
+        return Mono.just(Optional.ofNullable(modelFactories.get(command.getClass()))
+                                 .orElseThrow(() -> new RuntimeException("No model found for " + command.getClass())))
                    // create fresh command model
                    .map(factory -> (CommandModel<T>) factory.get())
-                   .flatMap(model -> sourceTheModelAndHandleTheCommand(model, cmd));
+                   .flatMap(model -> sourceTheModelAndHandleTheCommand(model, command));
     }
 
     private <T> Mono<Long> sourceTheModelAndHandleTheCommand(CommandModel<T> model, T cmd) {
@@ -60,8 +71,8 @@ public class SimpleCommandDispatcher implements CommandDispatcher {
     }
 
     @Override
-    public <T> void register(Class<T> commandType, Supplier<CommandModel<T>> model) {
-        modelFactories.put(commandType, model::get);
+    public <T> void register(Class<T> commandType, Supplier<CommandModel<T>> modelFactory) {
+        modelFactories.put(commandType, modelFactory::get);
     }
 
     private Event deserialize(io.event.thinking.eventstore.api.Event e) {

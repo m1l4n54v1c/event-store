@@ -2,8 +2,8 @@ package io.event.thinking.sample.faculty;
 
 import io.event.thinking.eventstore.api.EventStore;
 import io.event.thinking.eventstore.inmemory.InMemoryEventStore;
-import io.event.thinking.micro.modeling.Serializer;
-import io.event.thinking.micro.modeling.SimpleCommandDispatcher;
+import io.event.thinking.micro.es.Serializer;
+import io.event.thinking.micro.es.LocalCommandBus;
 import io.event.thinking.sample.faculty.api.command.SubscribeStudent;
 import io.event.thinking.sample.faculty.api.command.UnsubscribeStudent;
 import io.event.thinking.sample.faculty.api.event.CourseCreated;
@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 
 import static io.event.thinking.eventstore.api.Event.event;
 import static io.event.thinking.eventstore.api.Tag.tag;
-import static io.event.thinking.micro.modeling.Tags.type;
+import static io.event.thinking.micro.es.Tags.type;
 import static io.event.thinking.sample.faculty.model.Constants.COURSE_ID;
 import static io.event.thinking.sample.faculty.model.Constants.STUDENT_ID;
 
@@ -28,14 +28,14 @@ class FacultyTest {
     private final Serializer serializer = new Serializer() {
     };
     private EventStore eventStore;
-    private SimpleCommandDispatcher commandHandler;
+    private LocalCommandBus commandBus;
 
     @BeforeEach
     void setUp() {
         eventStore = new InMemoryEventStore();
-        commandHandler = new SimpleCommandDispatcher(eventStore);
-        commandHandler.register(SubscribeStudent.class, SubscribeStudentCommandModel::new);
-        commandHandler.register(UnsubscribeStudent.class, UnsubscribeStudentCommandModel::new);
+        commandBus = new LocalCommandBus(eventStore);
+        commandBus.register(SubscribeStudent.class, SubscribeStudentCommandModel::new);
+        commandBus.register(UnsubscribeStudent.class, UnsubscribeStudentCommandModel::new);
     }
 
     @Test
@@ -43,7 +43,7 @@ class FacultyTest {
         var studentId = enrollStudent();
         var courseId = createCourse();
 
-        StepVerifier.create(commandHandler.dispatch(new SubscribeStudent(studentId, courseId)))
+        StepVerifier.create(commandBus.dispatch(new SubscribeStudent(studentId, courseId)))
                     .expectNext(2L)
                     .verifyComplete();
     }
@@ -54,7 +54,7 @@ class FacultyTest {
         var courseId = createCourse();
         subscribe(studentId, courseId);
 
-        StepVerifier.create(commandHandler.dispatch(new SubscribeStudent(studentId, courseId)))
+        StepVerifier.create(commandBus.dispatch(new SubscribeStudent(studentId, courseId)))
                     .verifyErrorMessage("Student already subscribed to this course");
     }
 
@@ -67,7 +67,7 @@ class FacultyTest {
         subscribe(student1Id, courseId);
         subscribe(student2Id, courseId);
 
-        StepVerifier.create(commandHandler.dispatch(new SubscribeStudent(student3Id, courseId)))
+        StepVerifier.create(commandBus.dispatch(new SubscribeStudent(student3Id, courseId)))
                     .verifyErrorMessage("Course is fully booked");
     }
 
@@ -79,7 +79,7 @@ class FacultyTest {
                  .mapToObj(i -> createCourse())
                  .forEach(courseId -> subscribe(studentId, courseId));
 
-        StepVerifier.create(commandHandler.dispatch(new SubscribeStudent(studentId, targetCourseId)))
+        StepVerifier.create(commandBus.dispatch(new SubscribeStudent(studentId, targetCourseId)))
                     .verifyErrorMessage("Student subscribed to too many courses");
     }
 
@@ -88,7 +88,7 @@ class FacultyTest {
         var studentId = UUID.randomUUID().toString();
         var courseId = createCourse();
 
-        StepVerifier.create(commandHandler.dispatch(new SubscribeStudent(studentId, courseId)))
+        StepVerifier.create(commandBus.dispatch(new SubscribeStudent(studentId, courseId)))
                     .verifyErrorMessage("Student with given id never enrolled the faculty");
     }
 
@@ -97,7 +97,7 @@ class FacultyTest {
         var studentId = enrollStudent();
         var courseId = UUID.randomUUID().toString();
 
-        StepVerifier.create(commandHandler.dispatch(new SubscribeStudent(studentId, courseId)))
+        StepVerifier.create(commandBus.dispatch(new SubscribeStudent(studentId, courseId)))
                     .verifyErrorMessage("Course with given id does not exist");
     }
 

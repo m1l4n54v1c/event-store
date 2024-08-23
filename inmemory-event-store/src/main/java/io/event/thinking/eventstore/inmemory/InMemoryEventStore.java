@@ -61,9 +61,8 @@ public class InMemoryEventStore implements EventStore {
             throw new InvalidConsistencyConditionException();
         }
 
-        long globalSequenceOfFirst = head();
         events.forEach(e -> this.events.put(head(), e));
-        return globalSequenceOfFirst;
+        return head() - 1;
     }
 
     /**

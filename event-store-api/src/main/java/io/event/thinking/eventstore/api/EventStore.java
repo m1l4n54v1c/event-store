@@ -39,12 +39,12 @@ public interface EventStore {
     }
 
     /**
-     * Conditionally appends the {@code events} to this Event Store depending on the provided
+     * Conditionally appends the transaction of {@code events} to this Event Store depending on the provided
      * {@code consistencyCondition}.
      *
      * @param events               events to be stored
      * @param consistencyCondition the consistency condition used to validate the append
-     * @return successful {@link Mono} with the global sequence of the first stored event if the append was successful.
+     * @return successful {@link Mono} with the global sequence of the last stored event if the append was successful.
      * In case the provided {@code consistencyCondition} was not met, it returns errored {@link Mono} with
      * {@link InvalidConsistencyConditionException}.
      * @see ConsistencyCondition
@@ -88,5 +88,15 @@ public interface EventStore {
      */
     default Mono<Long> append(Event event) {
         return append(event, null);
+    }
+
+    /**
+     * Appends the transaction of {@code events} to this Event Store unconditionally.
+     *
+     * @param events events to be stored
+     * @return a {@link Mono} with the global sequence of the last stored event
+     */
+    default Mono<Long> append(List<Event> events) {
+        return append(events, null);
     }
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import java.util.List;
 import java.util.stream.IntStream;
 
 import static io.event.thinking.eventstore.api.ConsistencyCondition.consistencyCondition;
@@ -31,6 +32,15 @@ class InMemoryEventStoreTest {
         StepVerifier.create(eventStore.append(event(emptyPayload())))
                     .expectNext(0L)
                     .verifyComplete();
+    }
+
+    @Test
+    void appendTransaction() {
+        StepVerifier.create(eventStore.append(List.of(event(emptyPayload()),
+                                                      event(emptyPayload()),
+                                                      event(emptyPayload()))))
+                .expectNext(2L)
+                .verifyComplete();
     }
 
     @Test

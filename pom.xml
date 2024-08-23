@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>inmemory-event-store</module>
-        <module>micro-modeling</module>
+        <module>micro-es</module>
         <module>sample-faculty</module>
         <module>event-store-api</module>
     </modules>
@@ -39,7 +39,7 @@
 
             <dependency>
                 <groupId>io.event.thinking</groupId>
-                <artifactId>micro-modeling</artifactId>
+                <artifactId>micro-es</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
