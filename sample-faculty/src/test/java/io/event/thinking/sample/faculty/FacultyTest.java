@@ -9,6 +9,7 @@ import io.event.thinking.sample.faculty.api.command.UnsubscribeStudent;
 import io.event.thinking.sample.faculty.api.event.CourseCreated;
 import io.event.thinking.sample.faculty.api.event.StudentEnrolledFaculty;
 import io.event.thinking.sample.faculty.api.event.StudentSubscribed;
+import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 import io.event.thinking.sample.faculty.model.SubscribeStudentCommandModel;
 import io.event.thinking.sample.faculty.model.UnsubscribeStudentCommandModel;
 import org.junit.jupiter.api.*;
@@ -101,6 +102,49 @@ class FacultyTest {
                     .verifyErrorMessage("Course with given id does not exist");
     }
 
+    @Test
+    void subscribeAfterUnsubscription() {
+        var studentId = enrollStudent();
+        var courseId = createCourse();
+        subscribe(studentId, courseId);
+        unsubscribe(studentId, courseId);
+
+        StepVerifier.create(commandBus.dispatch(new SubscribeStudent(studentId, courseId)))
+                    .expectNext(4L)
+                    .verifyComplete();
+    }
+
+    @Test
+    void unsubscribe() {
+        var studentId = enrollStudent();
+        var courseId = createCourse();
+        subscribe(studentId, courseId);
+
+        StepVerifier.create(commandBus.dispatch(new UnsubscribeStudent(studentId, courseId)))
+                    .expectNext(3L)
+                    .verifyComplete();
+    }
+
+    @Test
+    void unsubscribeWithoutStudentBeingSubscribed() {
+        var studentId = enrollStudent();
+        var courseId = createCourse();
+
+        StepVerifier.create(commandBus.dispatch(new UnsubscribeStudent(studentId, courseId)))
+                    .verifyErrorMessage("Student is not subscribed to course");
+    }
+
+    @Test
+    void unsubscribeAfterUnsubscription() {
+        var studentId = enrollStudent();
+        var courseId = createCourse();
+        subscribe(studentId, courseId);
+        unsubscribe(studentId, courseId);
+
+        StepVerifier.create(commandBus.dispatch(new UnsubscribeStudent(studentId, courseId)))
+                    .verifyErrorMessage("Student is not subscribed to course");
+    }
+
     private String enrollStudent() {
         var studentId = UUID.randomUUID().toString();
         eventStore.append(event(serializer.serialize(new StudentEnrolledFaculty(studentId, "Name", "Lastname")),
@@ -126,6 +170,14 @@ class FacultyTest {
     private void subscribe(String studentId, String courseId) {
         eventStore.append(event(serializer.serialize(new StudentSubscribed(studentId, courseId)),
                                 type(StudentSubscribed.NAME),
+                                tag(STUDENT_ID, studentId),
+                                tag(COURSE_ID, courseId)))
+                  .block();
+    }
+
+    private void unsubscribe(String studentId, String courseId) {
+        eventStore.append(event(serializer.serialize(new StudentUnsubscribed(studentId, courseId)),
+                                type(StudentUnsubscribed.NAME),
                                 tag(STUDENT_ID, studentId),
                                 tag(COURSE_ID, courseId)))
                   .block();
