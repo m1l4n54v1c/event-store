@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 
 import static io.event.thinking.eventstore.Event.event;
 import static io.event.thinking.eventstore.Tag.tag;
-import static io.event.thinking.micro.modeling.TagUtils.type;
+import static io.event.thinking.micro.modeling.Tags.type;
 import static io.event.thinking.sample.faculty.model.Constants.COURSE_ID;
 import static io.event.thinking.sample.faculty.model.Constants.STUDENT_ID;
 

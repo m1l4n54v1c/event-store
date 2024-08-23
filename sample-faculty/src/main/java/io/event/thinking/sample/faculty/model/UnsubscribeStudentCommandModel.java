@@ -12,7 +12,7 @@ import static io.event.thinking.eventstore.Criteria.criteria;
 import static io.event.thinking.eventstore.Criterion.criterion;
 import static io.event.thinking.eventstore.Tag.tag;
 import static io.event.thinking.micro.modeling.Event.event;
-import static io.event.thinking.micro.modeling.TagUtils.type;
+import static io.event.thinking.micro.modeling.Tags.type;
 import static io.event.thinking.sample.faculty.model.Constants.COURSE_ID;
 import static io.event.thinking.sample.faculty.model.Constants.STUDENT_ID;
 
