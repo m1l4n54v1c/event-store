@@ -5,6 +5,9 @@
 The simplest possible API and in-memory implementation of an Event Store. The API supports basics of [DCB (Dynamic
 Consistency Boundary) concept](https://www.youtube.com/watch?v=IgigmuHHchI).
 
+If you are already familiar with DCB concepts, you might want to check out the [sample](sample-faculty/readme.md) right
+away. Otherwise, continue reading to get yourself familiar with the concepts.
+
 Although simple, the Event Store API contains enough concepts to cover basic functionalities of an Event Store. It
 contains two operations:
 
