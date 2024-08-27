@@ -29,5 +29,5 @@ event-sourcing handlers, the command handler, and the criteria used to filter ev
 > layer that would delegate calls to the domain. This way, the domain can remain clean of any framework code. However,
 > we decided to implement it right in the domain layer for the simplicity of this sample.
 
-CommandBus is also part of the micro-es module. It is implemented to find models locally (in the same JVM), source the
-model, and dispatch the command to it.
+`CommandBus` is also part of the `micro-es` module. It is implemented to find models locally (in the same JVM), source 
+the model, and dispatch the command to it.
