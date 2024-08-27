@@ -4,12 +4,20 @@ import io.event.thinking.eventstore.api.EventStore;
 import io.event.thinking.eventstore.inmemory.InMemoryEventStore;
 import io.event.thinking.micro.es.LocalCommandBus;
 import io.event.thinking.sample.faculty.api.command.SubscribeStudent;
+import io.event.thinking.sample.faculty.api.event.StudentSubscribed;
 import io.event.thinking.sample.faculty.model.SubscribeStudentCommandModel;
 import org.junit.jupiter.api.*;
 import reactor.test.StepVerifier;
 
 import java.util.UUID;
 import java.util.stream.IntStream;
+
+import static io.event.thinking.eventstore.api.Criteria.criteria;
+import static io.event.thinking.eventstore.api.Criterion.criterion;
+import static io.event.thinking.eventstore.api.Tag.tag;
+import static io.event.thinking.micro.es.Tags.type;
+import static io.event.thinking.sample.faculty.model.Constants.COURSE_ID;
+import static io.event.thinking.sample.faculty.model.Constants.STUDENT_ID;
 
 class SubscribeStudentTest {
 
@@ -98,6 +106,33 @@ class SubscribeStudentTest {
 
         StepVerifier.create(commandBus.dispatch(new SubscribeStudent(studentId, courseId)))
                     .expectNext(4L)
+                    .verifyComplete();
+    }
+
+    @Test
+    void increaseCourseCapacityAllowsSubscribingToPreviouslyFullCourse() {
+        var student1 = fixtures.enrollStudent();
+        var student2 = fixtures.enrollStudent();
+        var student3 = fixtures.enrollStudent();
+        var courseId = fixtures.createCourse(2);
+        fixtures.subscribe(student1, courseId);
+        fixtures.subscribe(student2, courseId);
+        // subscribing over capacity has to fail
+        StepVerifier.create(commandBus.dispatch(new SubscribeStudent(student3, courseId)))
+                    .verifyError();
+
+        fixtures.changeCourseCapacity(courseId, 1000);
+
+        StepVerifier.create(commandBus.dispatch(new SubscribeStudent(student3, courseId)))
+                    .expectNextCount(1)
+                    .verifyComplete();
+
+        // ensure we have exactly one event of this student subscribing to this course
+        StepVerifier.create(eventStore.read(criteria(criterion(type(StudentSubscribed.NAME),
+                                                               tag(COURSE_ID, courseId),
+                                                               tag(STUDENT_ID, student3))))
+                                      .flux())
+                    .expectNextCount(1L)
                     .verifyComplete();
     }
 }

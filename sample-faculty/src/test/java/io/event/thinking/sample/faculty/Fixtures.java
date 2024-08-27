@@ -3,6 +3,7 @@ package io.event.thinking.sample.faculty;
 import io.event.thinking.eventstore.api.Event;
 import io.event.thinking.eventstore.api.EventStore;
 import io.event.thinking.micro.es.Serializer;
+import io.event.thinking.sample.faculty.api.event.CourseCapacityChanged;
 import io.event.thinking.sample.faculty.api.event.CourseCreated;
 import io.event.thinking.sample.faculty.api.event.CourseRenamed;
 import io.event.thinking.sample.faculty.api.event.StudentEnrolledFaculty;
@@ -86,6 +87,17 @@ public class Fixtures {
     Event courseRenamedEvent(String courseId, String newCourseName) {
         return event(serializer.serialize(new CourseRenamed(courseId, newCourseName)),
                      type(CourseRenamed.NAME),
+                     tag(COURSE_ID, courseId));
+    }
+
+    void changeCourseCapacity(String courseId, int newCapacity){
+        eventStore.append(courseCapacityChangedEvent(courseId, newCapacity))
+                  .block();
+    }
+
+    Event courseCapacityChangedEvent(String courseId, int newCapacity) {
+        return event(serializer.serialize(new CourseCapacityChanged(courseId, newCapacity)),
+                     type(CourseCapacityChanged.NAME),
                      tag(COURSE_ID, courseId));
     }
 }

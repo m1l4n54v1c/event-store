@@ -1,10 +1,9 @@
 package io.event.thinking.sample.faculty;
 
-import io.event.thinking.eventstore.api.Event;
 import io.event.thinking.eventstore.api.EventStore;
-import io.event.thinking.eventstore.api.SequencedEvent;
 import io.event.thinking.eventstore.inmemory.InMemoryEventStore;
 import io.event.thinking.micro.es.LocalCommandBus;
+import io.event.thinking.micro.es.Serializer;
 import io.event.thinking.sample.faculty.api.command.RenameCourse;
 import io.event.thinking.sample.faculty.api.event.CourseRenamed;
 import io.event.thinking.sample.faculty.model.RenameCourseCommandModel;
@@ -16,10 +15,14 @@ import java.util.UUID;
 import static io.event.thinking.eventstore.api.Criteria.criteria;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.eventstore.api.Tag.tag;
+import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Tags.type;
 import static io.event.thinking.sample.faculty.model.Constants.COURSE_ID;
 
 class RenameStudentTest {
+
+    private Serializer serializer = new Serializer() {
+    };
     private EventStore eventStore;
     private LocalCommandBus commandBus;
 
@@ -28,7 +31,7 @@ class RenameStudentTest {
     @BeforeEach
     void setUp() {
         eventStore = new InMemoryEventStore();
-        fixtures = new Fixtures(eventStore);
+        fixtures = new Fixtures(eventStore, serializer);
         commandBus = new LocalCommandBus(eventStore);
         commandBus.register(RenameCourse.class, RenameCourseCommandModel::new);
     }
@@ -42,10 +45,13 @@ class RenameStudentTest {
                     .expectNext(1L)
                     .verifyComplete();
 
-        Event historyOfArtsEvent = fixtures.courseRenamedEvent(courseId, newName);
+        var courseRenamed = event(new CourseRenamed(courseId, newName),
+                                  type(CourseRenamed.NAME),
+                                  tag(COURSE_ID, courseId));
         StepVerifier.create(eventStore.read(criteria(criterion(type(CourseRenamed.NAME), tag(COURSE_ID, courseId))))
-                                      .flux())
-                    .expectNext(SequencedEvent.sequencedEvent(1L, historyOfArtsEvent))
+                                      .flux()
+                                      .map(s -> event(s.event().tags(), serializer.deserialize(s.event().payload()))))
+                    .expectNext(courseRenamed)
                     .verifyComplete();
     }
 
@@ -59,10 +65,14 @@ class RenameStudentTest {
                     .expectNext(2L)
                     .verifyComplete();
 
-        Event historyOfArtsEvent = fixtures.courseRenamedEvent(courseId, newName);
+        var courseRenamed = event(new CourseRenamed(courseId, newName),
+                                  type(CourseRenamed.NAME),
+                                  tag(COURSE_ID, courseId));
         StepVerifier.create(eventStore.read(criteria(criterion(type(CourseRenamed.NAME), tag(COURSE_ID, courseId))))
-                                      .flux())
-                    .expectNext(SequencedEvent.sequencedEvent(2L, historyOfArtsEvent))
+                                      .flux()
+                                      .last()
+                                      .map(s -> event(s.event().tags(), serializer.deserialize(s.event().payload()))))
+                    .expectNext(courseRenamed)
                     .verifyComplete();
     }
 
