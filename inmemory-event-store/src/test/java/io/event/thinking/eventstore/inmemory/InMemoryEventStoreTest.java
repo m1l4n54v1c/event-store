@@ -1,6 +1,7 @@
 package io.event.thinking.eventstore.inmemory;
 
 import io.event.thinking.eventstore.api.InvalidConsistencyConditionException;
+import io.event.thinking.eventstore.api.MarkedEvents;
 import io.event.thinking.eventstore.api.SequencedEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,8 +40,8 @@ class InMemoryEventStoreTest {
         StepVerifier.create(eventStore.append(List.of(event(emptyPayload()),
                                                       event(emptyPayload()),
                                                       event(emptyPayload()))))
-                .expectNext(2L)
-                .verifyComplete();
+                    .expectNext(2L)
+                    .verifyComplete();
     }
 
     @Test
@@ -185,6 +186,20 @@ class InMemoryEventStoreTest {
     void readFromEmptyEventStoreWithoutCriteria() {
         StepVerifier.create(eventStore.read()
                                       .flux())
+                    .verifyComplete();
+    }
+
+    @Test
+    void readWithNullCriteria() {
+        var tag = tag("key", "value");
+        var event = event(payload("event"), tag);
+        eventStore.append(event)
+                  .block();
+
+        MarkedEvents result = eventStore.read(0L, null);
+        assertEquals(1L, result.consistencyMarker());
+        StepVerifier.create(result.flux())
+                    .expectNext(sequencedEvent(0L, event))
                     .verifyComplete();
     }
 

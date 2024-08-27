@@ -7,12 +7,14 @@ import io.event.thinking.eventstore.api.InvalidConsistencyConditionException;
 import io.event.thinking.eventstore.api.SequencedEvent;
 import io.event.thinking.eventstore.api.MarkedEvents;
 import io.event.thinking.eventstore.api.Event;
+import io.event.thinking.eventstore.api.Tag;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Supplier;
@@ -47,9 +49,13 @@ public class InMemoryEventStore implements EventStore {
                 () -> Flux.fromStream(events.tailMap(fromSequence)
                                             .entrySet()
                                             .stream()
-                                            .filter(entry -> criteria.matches(entry.getValue().tags()))
+                                            .filter(entry -> matches(criteria, entry.getValue().tags()))
                                             .map(SequencedEvent::sequencedEvent));
         return new MarkedEvents(head(), Flux.defer(sourced));
+    }
+
+    private boolean matches(Criteria criteria, Set<Tag> tags) {
+        return criteria == null || criteria.matches(tags);
     }
 
     /**
