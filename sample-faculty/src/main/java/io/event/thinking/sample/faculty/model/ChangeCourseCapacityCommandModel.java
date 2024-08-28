@@ -16,8 +16,8 @@ import java.util.List;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Tags.courseId;
-import static io.event.thinking.sample.faculty.model.Tags.studentId;
+import static io.event.thinking.sample.faculty.model.Tags.courseIdTag;
+import static io.event.thinking.sample.faculty.model.Tags.studentIdTag;
 
 public class ChangeCourseCapacityCommandModel implements CommandModel<ChangeCourseCapacity> {
 
@@ -26,9 +26,9 @@ public class ChangeCourseCapacityCommandModel implements CommandModel<ChangeCour
 
     @Override
     public Criteria criteria(ChangeCourseCapacity cmd) {
-        return Criteria.criteria(criterion(type(CourseCreated.NAME), courseId(cmd.courseId())),
-                                 criterion(type(StudentSubscribed.NAME), courseId(cmd.courseId())),
-                                 criterion(type(StudentUnsubscribed.NAME), courseId(cmd.courseId())));
+        return Criteria.criteria(criterion(type(CourseCreated.NAME), courseIdTag(cmd.courseId())),
+                                 criterion(type(StudentSubscribed.NAME), courseIdTag(cmd.courseId())),
+                                 criterion(type(StudentUnsubscribed.NAME), courseIdTag(cmd.courseId())));
     }
 
     void on(CourseCreated evt) {
@@ -66,14 +66,14 @@ public class ChangeCourseCapacityCommandModel implements CommandModel<ChangeCour
     private static Event tagEvent(CourseCapacityChanged event) {
         return event(event,
                      type(CourseCapacityChanged.NAME),
-                     courseId(event.id()));
+                     courseIdTag(event.id()));
     }
 
     private static Event tagEvent(StudentUnsubscribed event) {
         return event(event,
                      type(StudentUnsubscribed.NAME),
-                     courseId(event.courseId()),
-                     studentId(event.studentId()));
+                     courseIdTag(event.courseId()),
+                     studentIdTag(event.studentId()));
     }
 
     @Override

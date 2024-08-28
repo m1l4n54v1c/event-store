@@ -17,7 +17,7 @@ import java.util.UUID;
 import static io.event.thinking.eventstore.api.Criteria.criteria;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Tags.courseId;
+import static io.event.thinking.sample.faculty.model.Tags.courseIdTag;
 
 class ChangeCourseCapacityTest {
 
@@ -51,7 +51,7 @@ class ChangeCourseCapacityTest {
                     .verifyComplete();
 
         var unsubscribedStudents = eventStore.read(criteria(criterion(type(StudentUnsubscribed.NAME),
-                                                                      courseId(courseId))))
+                                                                      courseIdTag(courseId))))
                                              .flux()
                                              .map(SequencedEvent::event)
                                              .map(e -> (StudentUnsubscribed) serializer.deserialize(e.payload()))

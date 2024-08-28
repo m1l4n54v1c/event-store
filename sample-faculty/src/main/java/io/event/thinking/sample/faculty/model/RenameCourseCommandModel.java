@@ -12,7 +12,7 @@ import java.util.List;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Tags.courseId;
+import static io.event.thinking.sample.faculty.model.Tags.courseIdTag;
 
 public class RenameCourseCommandModel implements CommandModel<RenameCourse> {
 
@@ -21,7 +21,7 @@ public class RenameCourseCommandModel implements CommandModel<RenameCourse> {
     @Override
     public Criteria criteria(RenameCourse command) {
         return Criteria.criteria(criterion(type(CourseCreated.NAME),
-                                           courseId(command.courseId())));
+                                           courseIdTag(command.courseId())));
     }
 
     private void on(CourseCreated evt) {
@@ -47,6 +47,6 @@ public class RenameCourseCommandModel implements CommandModel<RenameCourse> {
     private static Event tagEvent(CourseRenamed event) {
         return event(event,
                      type(CourseRenamed.NAME),
-                     courseId(event.courseId()));
+                     courseIdTag(event.courseId()));
     }
 }
