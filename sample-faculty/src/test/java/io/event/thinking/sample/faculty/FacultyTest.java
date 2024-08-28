@@ -2,8 +2,8 @@ package io.event.thinking.sample.faculty;
 
 import io.event.thinking.eventstore.api.EventStore;
 import io.event.thinking.eventstore.inmemory.InMemoryEventStore;
-import io.event.thinking.micro.es.Serializer;
 import io.event.thinking.micro.es.LocalCommandBus;
+import io.event.thinking.micro.es.Serializer;
 import io.event.thinking.sample.faculty.api.command.SubscribeStudent;
 import io.event.thinking.sample.faculty.api.command.UnsubscribeStudent;
 import io.event.thinking.sample.faculty.api.event.CourseCreated;
@@ -19,10 +19,9 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 
 import static io.event.thinking.eventstore.api.Event.event;
-import static io.event.thinking.eventstore.api.Tag.tag;
 import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Constants.COURSE_ID;
-import static io.event.thinking.sample.faculty.model.Constants.STUDENT_ID;
+import static io.event.thinking.sample.faculty.model.Tags.courseId;
+import static io.event.thinking.sample.faculty.model.Tags.studentId;
 
 class FacultyTest {
 
@@ -149,7 +148,7 @@ class FacultyTest {
         var studentId = UUID.randomUUID().toString();
         eventStore.append(event(serializer.serialize(new StudentEnrolledFaculty(studentId, "Name", "Lastname")),
                                 type(StudentEnrolledFaculty.NAME),
-                                tag(STUDENT_ID, studentId)))
+                                studentId(studentId)))
                   .block();
         return studentId;
     }
@@ -162,7 +161,7 @@ class FacultyTest {
         var courseId = UUID.randomUUID().toString();
         eventStore.append(event(serializer.serialize(new CourseCreated(courseId, capacity)),
                                 type(CourseCreated.NAME),
-                                tag(COURSE_ID, courseId)))
+                                courseId(courseId)))
                   .block();
         return courseId;
     }
@@ -170,16 +169,16 @@ class FacultyTest {
     private void subscribe(String studentId, String courseId) {
         eventStore.append(event(serializer.serialize(new StudentSubscribed(studentId, courseId)),
                                 type(StudentSubscribed.NAME),
-                                tag(STUDENT_ID, studentId),
-                                tag(COURSE_ID, courseId)))
+                                studentId(studentId),
+                                courseId(courseId)))
                   .block();
     }
 
     private void unsubscribe(String studentId, String courseId) {
         eventStore.append(event(serializer.serialize(new StudentUnsubscribed(studentId, courseId)),
                                 type(StudentUnsubscribed.NAME),
-                                tag(STUDENT_ID, studentId),
-                                tag(COURSE_ID, courseId)))
+                                studentId(studentId),
+                                courseId(courseId)))
                   .block();
     }
 }

@@ -10,11 +10,10 @@ import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 import java.util.List;
 
 import static io.event.thinking.eventstore.api.Criterion.criterion;
-import static io.event.thinking.eventstore.api.Tag.tag;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Constants.COURSE_ID;
-import static io.event.thinking.sample.faculty.model.Constants.STUDENT_ID;
+import static io.event.thinking.sample.faculty.model.Tags.courseId;
+import static io.event.thinking.sample.faculty.model.Tags.studentId;
 
 public class UnsubscribeStudentCommandModel implements CommandModel<UnsubscribeStudent> {
 
@@ -23,11 +22,11 @@ public class UnsubscribeStudentCommandModel implements CommandModel<UnsubscribeS
     @Override
     public Criteria criteria(UnsubscribeStudent cmd) {
         return Criteria.criteria(criterion(type(StudentSubscribed.NAME),
-                                           tag(STUDENT_ID, cmd.studentId()),
-                                           tag(COURSE_ID, cmd.courseId())),
+                                           studentId(cmd.studentId()),
+                                           courseId(cmd.courseId())),
                                  criterion(type(StudentUnsubscribed.NAME),
-                                           tag(STUDENT_ID, cmd.studentId()),
-                                           tag(COURSE_ID, cmd.courseId())));
+                                           studentId(cmd.studentId()),
+                                           courseId(cmd.courseId())));
     }
 
     @Override
@@ -49,8 +48,8 @@ public class UnsubscribeStudentCommandModel implements CommandModel<UnsubscribeS
     private static Event tagEvent(StudentUnsubscribed event) {
         return event(event,
                      type(StudentUnsubscribed.NAME),
-                     tag(STUDENT_ID, event.studentId()),
-                     tag(COURSE_ID, event.courseId()));
+                     studentId(event.studentId()),
+                     courseId(event.courseId()));
     }
 
     // This would be done by the framework for you
