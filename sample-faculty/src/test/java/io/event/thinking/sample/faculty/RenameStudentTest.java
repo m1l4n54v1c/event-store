@@ -16,7 +16,7 @@ import static io.event.thinking.eventstore.api.Criteria.criteria;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Tags.courseId;
+import static io.event.thinking.sample.faculty.model.Tags.courseIdTag;
 
 class RenameStudentTest {
 
@@ -46,8 +46,8 @@ class RenameStudentTest {
 
         var courseRenamed = event(new CourseRenamed(courseId, newName),
                                   type(CourseRenamed.NAME),
-                                  courseId(courseId));
-        StepVerifier.create(eventStore.read(criteria(criterion(type(CourseRenamed.NAME), courseId(courseId))))
+                                  courseIdTag(courseId));
+        StepVerifier.create(eventStore.read(criteria(criterion(type(CourseRenamed.NAME), courseIdTag(courseId))))
                                       .flux()
                                       .map(s -> event(s.event().tags(), serializer.deserialize(s.event().payload()))))
                     .expectNext(courseRenamed)
@@ -66,8 +66,8 @@ class RenameStudentTest {
 
         var courseRenamed = event(new CourseRenamed(courseId, newName),
                                   type(CourseRenamed.NAME),
-                                  courseId(courseId));
-        StepVerifier.create(eventStore.read(criteria(criterion(type(CourseRenamed.NAME), courseId(courseId))))
+                                  courseIdTag(courseId));
+        StepVerifier.create(eventStore.read(criteria(criterion(type(CourseRenamed.NAME), courseIdTag(courseId))))
                                       .flux()
                                       .last()
                                       .map(s -> event(s.event().tags(), serializer.deserialize(s.event().payload()))))

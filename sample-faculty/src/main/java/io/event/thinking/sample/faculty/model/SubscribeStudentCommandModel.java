@@ -15,8 +15,8 @@ import java.util.List;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Tags.courseId;
-import static io.event.thinking.sample.faculty.model.Tags.studentId;
+import static io.event.thinking.sample.faculty.model.Tags.courseIdTag;
+import static io.event.thinking.sample.faculty.model.Tags.studentIdTag;
 
 public class SubscribeStudentCommandModel implements CommandModel<SubscribeStudent> {
 
@@ -31,13 +31,13 @@ public class SubscribeStudentCommandModel implements CommandModel<SubscribeStude
 
     @Override
     public Criteria criteria(SubscribeStudent cmd) {
-        return Criteria.criteria(criterion(type(StudentEnrolledFaculty.NAME), studentId(cmd.studentId())),
-                                 criterion(type(CourseCreated.NAME), courseId(cmd.courseId())),
-                                 criterion(type(CourseCapacityChanged.NAME), courseId(cmd.courseId())),
-                                 criterion(type(StudentSubscribed.NAME), courseId(cmd.courseId())),
-                                 criterion(type(StudentSubscribed.NAME), studentId(cmd.studentId())),
-                                 criterion(type(StudentUnsubscribed.NAME), courseId(cmd.courseId())),
-                                 criterion(type(StudentUnsubscribed.NAME), studentId(cmd.studentId())));
+        return Criteria.criteria(criterion(type(StudentEnrolledFaculty.NAME), studentIdTag(cmd.studentId())),
+                                 criterion(type(CourseCreated.NAME), courseIdTag(cmd.courseId())),
+                                 criterion(type(CourseCapacityChanged.NAME), courseIdTag(cmd.courseId())),
+                                 criterion(type(StudentSubscribed.NAME), courseIdTag(cmd.courseId())),
+                                 criterion(type(StudentSubscribed.NAME), studentIdTag(cmd.studentId())),
+                                 criterion(type(StudentUnsubscribed.NAME), courseIdTag(cmd.courseId())),
+                                 criterion(type(StudentUnsubscribed.NAME), studentIdTag(cmd.studentId())));
     }
 
     @Override
@@ -96,8 +96,8 @@ public class SubscribeStudentCommandModel implements CommandModel<SubscribeStude
     private static Event tagEvent(StudentSubscribed event) {
         return event(event,
                      type(StudentSubscribed.NAME),
-                     studentId(event.studentId()),
-                     courseId(event.courseId()));
+                     studentIdTag(event.studentId()),
+                     courseIdTag(event.courseId()));
     }
 
 
