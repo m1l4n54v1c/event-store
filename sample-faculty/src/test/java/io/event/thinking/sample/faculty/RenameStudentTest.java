@@ -14,14 +14,13 @@ import java.util.UUID;
 
 import static io.event.thinking.eventstore.api.Criteria.criteria;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
-import static io.event.thinking.eventstore.api.Tag.tag;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Constants.COURSE_ID;
+import static io.event.thinking.sample.faculty.model.Tags.courseId;
 
 class RenameStudentTest {
 
-    private Serializer serializer = new Serializer() {
+    private final Serializer serializer = new Serializer() {
     };
     private EventStore eventStore;
     private LocalCommandBus commandBus;
@@ -47,8 +46,8 @@ class RenameStudentTest {
 
         var courseRenamed = event(new CourseRenamed(courseId, newName),
                                   type(CourseRenamed.NAME),
-                                  tag(COURSE_ID, courseId));
-        StepVerifier.create(eventStore.read(criteria(criterion(type(CourseRenamed.NAME), tag(COURSE_ID, courseId))))
+                                  courseId(courseId));
+        StepVerifier.create(eventStore.read(criteria(criterion(type(CourseRenamed.NAME), courseId(courseId))))
                                       .flux()
                                       .map(s -> event(s.event().tags(), serializer.deserialize(s.event().payload()))))
                     .expectNext(courseRenamed)
@@ -67,8 +66,8 @@ class RenameStudentTest {
 
         var courseRenamed = event(new CourseRenamed(courseId, newName),
                                   type(CourseRenamed.NAME),
-                                  tag(COURSE_ID, courseId));
-        StepVerifier.create(eventStore.read(criteria(criterion(type(CourseRenamed.NAME), tag(COURSE_ID, courseId))))
+                                  courseId(courseId));
+        StepVerifier.create(eventStore.read(criteria(criterion(type(CourseRenamed.NAME), courseId(courseId))))
                                       .flux()
                                       .last()
                                       .map(s -> event(s.event().tags(), serializer.deserialize(s.event().payload()))))

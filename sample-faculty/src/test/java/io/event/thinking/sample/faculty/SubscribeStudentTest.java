@@ -14,10 +14,9 @@ import java.util.stream.IntStream;
 
 import static io.event.thinking.eventstore.api.Criteria.criteria;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
-import static io.event.thinking.eventstore.api.Tag.tag;
 import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Constants.COURSE_ID;
-import static io.event.thinking.sample.faculty.model.Constants.STUDENT_ID;
+import static io.event.thinking.sample.faculty.model.Tags.courseId;
+import static io.event.thinking.sample.faculty.model.Tags.studentId;
 
 class SubscribeStudentTest {
 
@@ -129,8 +128,8 @@ class SubscribeStudentTest {
 
         // ensure we have exactly one event of this student subscribing to this course
         StepVerifier.create(eventStore.read(criteria(criterion(type(StudentSubscribed.NAME),
-                                                               tag(COURSE_ID, courseId),
-                                                               tag(STUDENT_ID, student3))))
+                                                               courseId(courseId),
+                                                               studentId(student3))))
                                       .flux())
                     .expectNextCount(1L)
                     .verifyComplete();
