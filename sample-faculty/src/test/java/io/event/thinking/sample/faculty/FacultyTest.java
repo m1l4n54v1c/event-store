@@ -20,8 +20,8 @@ import java.util.stream.IntStream;
 
 import static io.event.thinking.eventstore.api.Event.event;
 import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Tags.courseId;
-import static io.event.thinking.sample.faculty.model.Tags.studentId;
+import static io.event.thinking.sample.faculty.model.Tags.courseIdTag;
+import static io.event.thinking.sample.faculty.model.Tags.studentIdTag;
 
 class FacultyTest {
 
@@ -148,7 +148,7 @@ class FacultyTest {
         var studentId = UUID.randomUUID().toString();
         eventStore.append(event(serializer.serialize(new StudentEnrolledFaculty(studentId, "Name", "Lastname")),
                                 type(StudentEnrolledFaculty.NAME),
-                                studentId(studentId)))
+                                studentIdTag(studentId)))
                   .block();
         return studentId;
     }
@@ -161,7 +161,7 @@ class FacultyTest {
         var courseId = UUID.randomUUID().toString();
         eventStore.append(event(serializer.serialize(new CourseCreated(courseId, capacity)),
                                 type(CourseCreated.NAME),
-                                courseId(courseId)))
+                                courseIdTag(courseId)))
                   .block();
         return courseId;
     }
@@ -169,16 +169,16 @@ class FacultyTest {
     private void subscribe(String studentId, String courseId) {
         eventStore.append(event(serializer.serialize(new StudentSubscribed(studentId, courseId)),
                                 type(StudentSubscribed.NAME),
-                                studentId(studentId),
-                                courseId(courseId)))
+                                studentIdTag(studentId),
+                                courseIdTag(courseId)))
                   .block();
     }
 
     private void unsubscribe(String studentId, String courseId) {
         eventStore.append(event(serializer.serialize(new StudentUnsubscribed(studentId, courseId)),
                                 type(StudentUnsubscribed.NAME),
-                                studentId(studentId),
-                                courseId(courseId)))
+                                studentIdTag(studentId),
+                                courseIdTag(courseId)))
                   .block();
     }
 }

@@ -13,11 +13,11 @@ public class Tags {
 
     }
 
-    public static Tag courseId(String courseId) {
+    public static Tag courseIdTag(String courseId) {
         return tag(COURSE_ID, courseId);
     }
 
-    public static Tag studentId(String studentId) {
+    public static Tag studentIdTag(String studentId) {
         return tag(STUDENT_ID, studentId);
     }
 }
