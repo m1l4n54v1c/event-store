@@ -14,11 +14,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static io.event.thinking.eventstore.api.Criterion.criterion;
-import static io.event.thinking.eventstore.api.Tag.tag;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Constants.COURSE_ID;
-import static io.event.thinking.sample.faculty.model.Constants.STUDENT_ID;
+import static io.event.thinking.sample.faculty.model.Tags.courseId;
+import static io.event.thinking.sample.faculty.model.Tags.studentId;
 
 public class ChangeCourseCapacityCommandModel implements CommandModel<ChangeCourseCapacity> {
 
@@ -27,9 +26,9 @@ public class ChangeCourseCapacityCommandModel implements CommandModel<ChangeCour
 
     @Override
     public Criteria criteria(ChangeCourseCapacity cmd) {
-        return Criteria.criteria(criterion(type(CourseCreated.NAME), tag(COURSE_ID, cmd.courseId())),
-                                 criterion(type(StudentSubscribed.NAME), tag(COURSE_ID, cmd.courseId())),
-                                 criterion(type(StudentUnsubscribed.NAME), tag(COURSE_ID, cmd.courseId())));
+        return Criteria.criteria(criterion(type(CourseCreated.NAME), courseId(cmd.courseId())),
+                                 criterion(type(StudentSubscribed.NAME), courseId(cmd.courseId())),
+                                 criterion(type(StudentUnsubscribed.NAME), courseId(cmd.courseId())));
     }
 
     void on(CourseCreated evt) {
@@ -67,14 +66,14 @@ public class ChangeCourseCapacityCommandModel implements CommandModel<ChangeCour
     private static Event tagEvent(CourseCapacityChanged event) {
         return event(event,
                      type(CourseCapacityChanged.NAME),
-                     tag(COURSE_ID, event.id()));
+                     courseId(event.id()));
     }
 
     private static Event tagEvent(StudentUnsubscribed event) {
         return event(event,
                      type(StudentUnsubscribed.NAME),
-                     tag(COURSE_ID, event.courseId()),
-                     tag(STUDENT_ID, event.studentId()));
+                     courseId(event.courseId()),
+                     studentId(event.studentId()));
     }
 
     @Override
