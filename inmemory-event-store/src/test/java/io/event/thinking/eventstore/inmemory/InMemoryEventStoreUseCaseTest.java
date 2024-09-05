@@ -10,7 +10,7 @@ import static io.event.thinking.eventstore.api.ConsistencyCondition.consistencyC
 import static io.event.thinking.eventstore.api.Criteria.criteria;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.eventstore.api.SequencedEvent.sequencedEvent;
-import static io.event.thinking.eventstore.api.Tag.tag;
+import static io.event.thinking.eventstore.api.Index.index;
 import static io.event.thinking.eventstore.api.Event.event;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -25,15 +25,15 @@ class InMemoryEventStoreUseCaseTest {
 
     @Test
     void aggregateUseCase() {
-        var aggregateTag = tag("aggregateId", UUID.randomUUID().toString());
-        var criteria = criteria(criterion(aggregateTag));
+        var aggregateIndex = index("aggregateId", UUID.randomUUID().toString());
+        var criteria = criteria(criterion(aggregateIndex));
 
         var events = eventStore.read(criteria);
         assertEquals(0L, events.consistencyMarker());
         StepVerifier.create(events.flux())
                     .verifyComplete();
 
-        var evt1 = event(payload("evt1"), aggregateTag);
+        var evt1 = event(payload("evt1"), aggregateIndex);
         var append = eventStore.append(evt1, consistencyCondition(events.consistencyMarker(), criteria));
         StepVerifier.create(append)
                     .expectNext(0L)
@@ -45,7 +45,7 @@ class InMemoryEventStoreUseCaseTest {
                     .expectNext(sequencedEvent(0L, evt1))
                     .verifyComplete();
 
-        var evt2 = event(payload("evt2"), aggregateTag);
+        var evt2 = event(payload("evt2"), aggregateIndex);
         append = eventStore.append(evt2, consistencyCondition(events.consistencyMarker(), criteria));
         StepVerifier.create(append)
                     .expectNext(1L)
@@ -61,16 +61,16 @@ class InMemoryEventStoreUseCaseTest {
 
     @Test
     void dcbUseCase() {
-        var studentTag = tag("studentId", UUID.randomUUID().toString());
-        var courseTag = tag("courseId", UUID.randomUUID().toString());
+        var studentIndex = index("studentId", UUID.randomUUID().toString());
+        var courseIndex = index("courseId", UUID.randomUUID().toString());
 
-        var studentCriteria = criteria(criterion(studentTag));
-        var courseCriteria = criteria(criterion(courseTag));
-        var studentCourseCriteria = criteria(criterion(studentTag, courseTag));
+        var studentCriteria = criteria(criterion(studentIndex));
+        var courseCriteria = criteria(criterion(courseIndex));
+        var studentCourseCriteria = criteria(criterion(studentIndex, courseIndex));
 
-        var studentCreated = event(payload("studentCreated"), studentTag);
-        var courseCreated = event(payload("courseCreated"), courseTag);
-        var studentEnrolledCourse = event(payload("studentEnrolledCourse"), studentTag, courseTag);
+        var studentCreated = event(payload("studentCreated"), studentIndex);
+        var courseCreated = event(payload("courseCreated"), courseIndex);
+        var studentEnrolledCourse = event(payload("studentEnrolledCourse"), studentIndex, courseIndex);
 
         var consistencyMarker = eventStore.read(studentCriteria).consistencyMarker();
         eventStore.append(studentCreated, consistencyCondition(consistencyMarker, studentCriteria)).block();

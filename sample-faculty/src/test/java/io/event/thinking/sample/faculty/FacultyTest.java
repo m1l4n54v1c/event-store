@@ -19,9 +19,9 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 
 import static io.event.thinking.eventstore.api.Event.event;
-import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Tags.courseIdTag;
-import static io.event.thinking.sample.faculty.model.Tags.studentIdTag;
+import static io.event.thinking.micro.es.Indices.typeIndex;
+import static io.event.thinking.sample.faculty.model.Indices.courseIdIndex;
+import static io.event.thinking.sample.faculty.model.Indices.studentIdIndex;
 
 class FacultyTest {
 
@@ -147,8 +147,8 @@ class FacultyTest {
     private String enrollStudent() {
         var studentId = UUID.randomUUID().toString();
         eventStore.append(event(serializer.serialize(new StudentEnrolledFaculty(studentId, "Name", "Lastname")),
-                                type(StudentEnrolledFaculty.NAME),
-                                studentIdTag(studentId)))
+                                typeIndex(StudentEnrolledFaculty.NAME),
+                                studentIdIndex(studentId)))
                   .block();
         return studentId;
     }
@@ -160,25 +160,25 @@ class FacultyTest {
     private String createCourse(int capacity) {
         var courseId = UUID.randomUUID().toString();
         eventStore.append(event(serializer.serialize(new CourseCreated(courseId, capacity)),
-                                type(CourseCreated.NAME),
-                                courseIdTag(courseId)))
+                                typeIndex(CourseCreated.NAME),
+                                courseIdIndex(courseId)))
                   .block();
         return courseId;
     }
 
     private void subscribe(String studentId, String courseId) {
         eventStore.append(event(serializer.serialize(new StudentSubscribed(studentId, courseId)),
-                                type(StudentSubscribed.NAME),
-                                studentIdTag(studentId),
-                                courseIdTag(courseId)))
+                                typeIndex(StudentSubscribed.NAME),
+                                studentIdIndex(studentId),
+                                courseIdIndex(courseId)))
                   .block();
     }
 
     private void unsubscribe(String studentId, String courseId) {
         eventStore.append(event(serializer.serialize(new StudentUnsubscribed(studentId, courseId)),
-                                type(StudentUnsubscribed.NAME),
-                                studentIdTag(studentId),
-                                courseIdTag(courseId)))
+                                typeIndex(StudentUnsubscribed.NAME),
+                                studentIdIndex(studentId),
+                                courseIdIndex(courseId)))
                   .block();
     }
 }

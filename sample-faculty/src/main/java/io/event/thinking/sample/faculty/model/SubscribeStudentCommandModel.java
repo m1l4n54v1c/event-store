@@ -14,9 +14,9 @@ import java.util.List;
 
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.micro.es.Event.event;
-import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Tags.courseIdTag;
-import static io.event.thinking.sample.faculty.model.Tags.studentIdTag;
+import static io.event.thinking.micro.es.Indices.typeIndex;
+import static io.event.thinking.sample.faculty.model.Indices.courseIdIndex;
+import static io.event.thinking.sample.faculty.model.Indices.studentIdIndex;
 
 public class SubscribeStudentCommandModel implements CommandModel<SubscribeStudent> {
 
@@ -31,13 +31,13 @@ public class SubscribeStudentCommandModel implements CommandModel<SubscribeStude
 
     @Override
     public Criteria criteria(SubscribeStudent cmd) {
-        return Criteria.criteria(criterion(type(StudentEnrolledFaculty.NAME), studentIdTag(cmd.studentId())),
-                                 criterion(type(CourseCreated.NAME), courseIdTag(cmd.courseId())),
-                                 criterion(type(CourseCapacityChanged.NAME), courseIdTag(cmd.courseId())),
-                                 criterion(type(StudentSubscribed.NAME), courseIdTag(cmd.courseId())),
-                                 criterion(type(StudentSubscribed.NAME), studentIdTag(cmd.studentId())),
-                                 criterion(type(StudentUnsubscribed.NAME), courseIdTag(cmd.courseId())),
-                                 criterion(type(StudentUnsubscribed.NAME), studentIdTag(cmd.studentId())));
+        return Criteria.criteria(criterion(typeIndex(StudentEnrolledFaculty.NAME), studentIdIndex(cmd.studentId())),
+                                 criterion(typeIndex(CourseCreated.NAME), courseIdIndex(cmd.courseId())),
+                                 criterion(typeIndex(CourseCapacityChanged.NAME), courseIdIndex(cmd.courseId())),
+                                 criterion(typeIndex(StudentSubscribed.NAME), courseIdIndex(cmd.courseId())),
+                                 criterion(typeIndex(StudentSubscribed.NAME), studentIdIndex(cmd.studentId())),
+                                 criterion(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(cmd.courseId())),
+                                 criterion(typeIndex(StudentUnsubscribed.NAME), studentIdIndex(cmd.studentId())));
     }
 
     @Override
@@ -57,7 +57,11 @@ public class SubscribeStudentCommandModel implements CommandModel<SubscribeStude
         if (noOfCoursesStudentSubscribed == MAX_COURSES_PER_STUDENT) {
             throw new RuntimeException("Student subscribed to too many courses");
         }
-        return List.of(tagEvent(new StudentSubscribed(studentId, courseId)));
+        StudentSubscribed event = new StudentSubscribed(studentId, courseId);
+        return List.of(event(event,
+                             typeIndex(StudentSubscribed.NAME),
+                             studentIdIndex(event.studentId()),
+                             courseIdIndex(event.courseId())));
     }
 
     void on(CourseCreated evt) {
@@ -91,13 +95,6 @@ public class SubscribeStudentCommandModel implements CommandModel<SubscribeStude
         } else {
             noOfStudentsSubscribedToCourse--;
         }
-    }
-
-    private static Event tagEvent(StudentSubscribed event) {
-        return event(event,
-                     type(StudentSubscribed.NAME),
-                     studentIdTag(event.studentId()),
-                     courseIdTag(event.courseId()));
     }
 
 

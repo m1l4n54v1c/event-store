@@ -11,9 +11,9 @@ import java.util.List;
 
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.micro.es.Event.event;
-import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Tags.courseIdTag;
-import static io.event.thinking.sample.faculty.model.Tags.studentIdTag;
+import static io.event.thinking.micro.es.Indices.typeIndex;
+import static io.event.thinking.sample.faculty.model.Indices.courseIdIndex;
+import static io.event.thinking.sample.faculty.model.Indices.studentIdIndex;
 
 public class UnsubscribeStudentCommandModel implements CommandModel<UnsubscribeStudent> {
 
@@ -21,18 +21,22 @@ public class UnsubscribeStudentCommandModel implements CommandModel<UnsubscribeS
 
     @Override
     public Criteria criteria(UnsubscribeStudent cmd) {
-        return Criteria.criteria(criterion(type(StudentSubscribed.NAME),
-                                           studentIdTag(cmd.studentId()),
-                                           courseIdTag(cmd.courseId())),
-                                 criterion(type(StudentUnsubscribed.NAME),
-                                           studentIdTag(cmd.studentId()),
-                                           courseIdTag(cmd.courseId())));
+        return Criteria.criteria(criterion(typeIndex(StudentSubscribed.NAME),
+                                           studentIdIndex(cmd.studentId()),
+                                           courseIdIndex(cmd.courseId())),
+                                 criterion(typeIndex(StudentUnsubscribed.NAME),
+                                           studentIdIndex(cmd.studentId()),
+                                           courseIdIndex(cmd.courseId())));
     }
 
     @Override
     public List<Event> handle(UnsubscribeStudent cmd) {
         if (subscribed) {
-            return List.of(tagEvent(new StudentUnsubscribed(cmd.studentId(), cmd.courseId())));
+            StudentUnsubscribed event = new StudentUnsubscribed(cmd.studentId(), cmd.courseId());
+            return List.of(event(event,
+                                 typeIndex(StudentUnsubscribed.NAME),
+                                 studentIdIndex(event.studentId()),
+                                 courseIdIndex(event.courseId())));
         }
         throw new RuntimeException("Student is not subscribed to course");
     }
@@ -43,13 +47,6 @@ public class UnsubscribeStudentCommandModel implements CommandModel<UnsubscribeS
 
     void on(StudentUnsubscribed evt) {
         subscribed = false;
-    }
-
-    private static Event tagEvent(StudentUnsubscribed event) {
-        return event(event,
-                     type(StudentUnsubscribed.NAME),
-                     studentIdTag(event.studentId()),
-                     courseIdTag(event.courseId()));
     }
 
     // This would be done by the framework for you
