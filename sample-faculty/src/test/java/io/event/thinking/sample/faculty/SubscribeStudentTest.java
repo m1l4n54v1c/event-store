@@ -31,7 +31,7 @@ class SubscribeStudentTest {
         var courseId = UUID.randomUUID().toString();
 
         fixture.given(new StudentEnrolledFaculty(studentId, "Stefan", "Dragisic"),
-                      new CourseCreated(courseId, 10))
+                      new CourseCreated(courseId, "History", 10))
                .when(new SubscribeStudent(studentId, courseId))
                .expectEvents(new StudentSubscribed(studentId, courseId));
     }
@@ -42,7 +42,7 @@ class SubscribeStudentTest {
         var courseId = UUID.randomUUID().toString();
 
         fixture.given(new StudentEnrolledFaculty(studentId, "Stefan", "Dragisic"),
-                      new CourseCreated(courseId, 10),
+                      new CourseCreated(courseId, "History", 10),
                       new StudentSubscribed(studentId, courseId))
                .when(new SubscribeStudent(studentId, courseId))
                .expectException(RuntimeException.class, "Student already subscribed to this course");
@@ -58,7 +58,7 @@ class SubscribeStudentTest {
         fixture.given(new StudentEnrolledFaculty(student1Id, "Marc", "Gathier"),
                       new StudentEnrolledFaculty(student2Id, "Stefan", "Andjelkovic"),
                       new StudentEnrolledFaculty(student3Id, "Allard", "Buijze"),
-                      new CourseCreated(courseId, 2),
+                      new CourseCreated(courseId, "History", 2),
                       new StudentSubscribed(student1Id, courseId),
                       new StudentSubscribed(student2Id, courseId))
                .when(new SubscribeStudent(student3Id, courseId))
@@ -81,17 +81,17 @@ class SubscribeStudentTest {
         var targetCourseId = UUID.randomUUID().toString();
 
         fixture.given(new StudentEnrolledFaculty(studentId, "Milan", "Savic"),
-                      new CourseCreated(targetCourseId, 10),
-                      new CourseCreated(course1Id, 10),
-                      new CourseCreated(course2Id, 10),
-                      new CourseCreated(course3Id, 10),
-                      new CourseCreated(course4Id, 10),
-                      new CourseCreated(course5Id, 10),
-                      new CourseCreated(course6Id, 10),
-                      new CourseCreated(course7Id, 10),
-                      new CourseCreated(course8Id, 10),
-                      new CourseCreated(course9Id, 10),
-                      new CourseCreated(course10Id, 10),
+                      new CourseCreated(targetCourseId, "Programming", 10),
+                      new CourseCreated(course1Id, "Course 1", 10),
+                      new CourseCreated(course2Id, "Course 2", 10),
+                      new CourseCreated(course3Id, "Course 3", 10),
+                      new CourseCreated(course4Id, "Course 4", 10),
+                      new CourseCreated(course5Id, "Course 5", 10),
+                      new CourseCreated(course6Id, "Course 6", 10),
+                      new CourseCreated(course7Id, "Course 7", 10),
+                      new CourseCreated(course8Id, "Course 8", 10),
+                      new CourseCreated(course9Id, "Course 9", 10),
+                      new CourseCreated(course10Id, "Course 10", 10),
                       new StudentSubscribed(studentId, course1Id),
                       new StudentSubscribed(studentId, course2Id),
                       new StudentSubscribed(studentId, course3Id),
@@ -111,7 +111,7 @@ class SubscribeStudentTest {
         var studentId = UUID.randomUUID().toString();
         var courseId = UUID.randomUUID().toString();
 
-        fixture.given(new CourseCreated(courseId, 10))
+        fixture.given(new CourseCreated(courseId, "Math", 10))
                .when(new SubscribeStudent(studentId, courseId))
                .expectException(RuntimeException.class, "Student with given id never enrolled the faculty");
     }
@@ -131,7 +131,7 @@ class SubscribeStudentTest {
         var studentId = UUID.randomUUID().toString();
         var courseId = UUID.randomUUID().toString();
 
-        fixture.given(new CourseCreated(courseId, 10),
+        fixture.given(new CourseCreated(courseId, "Basketball", 10),
                       new StudentEnrolledFaculty(studentId, "Jovana", "Nogic"),
                       new StudentSubscribed(studentId, courseId),
                       new StudentUnsubscribed(studentId, courseId))
@@ -149,7 +149,7 @@ class SubscribeStudentTest {
         fixture.given(new StudentEnrolledFaculty(student1Id, "Bogdan", "Bogdanovic"),
                       new StudentEnrolledFaculty(student2Id, "Nikola", "Jokic"),
                       new StudentEnrolledFaculty(student3Id, "Vasilije", "Micic"),
-                      new CourseCreated(courseId, 2),
+                      new CourseCreated(courseId, "Basketball", 2),
                       new StudentSubscribed(student1Id, courseId),
                       new StudentSubscribed(student2Id, courseId),
                       new CourseCapacityChanged(courseId, 5))

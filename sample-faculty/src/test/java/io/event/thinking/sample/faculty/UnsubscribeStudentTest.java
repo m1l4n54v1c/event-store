@@ -30,7 +30,7 @@ class UnsubscribeStudentTest {
         var courseId = UUID.randomUUID().toString();
 
         fixture.given(new StudentEnrolledFaculty(studentId, "Novak", "Djokovic"),
-                      new CourseCreated(courseId, 1),
+                      new CourseCreated(courseId, "Tennis", 1),
                       new StudentSubscribed(studentId, courseId))
                .when(new UnsubscribeStudent(studentId, courseId))
                .expectEvents(new StudentUnsubscribed(studentId, courseId));

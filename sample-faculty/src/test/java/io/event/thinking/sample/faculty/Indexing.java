@@ -4,6 +4,7 @@ import io.event.thinking.eventstore.api.Index;
 import io.event.thinking.micro.es.test.MultiEventIndexer;
 import io.event.thinking.sample.faculty.api.event.CourseCapacityChanged;
 import io.event.thinking.sample.faculty.api.event.CourseCreated;
+import io.event.thinking.sample.faculty.api.event.CourseRenamed;
 import io.event.thinking.sample.faculty.api.event.StudentEnrolledFaculty;
 import io.event.thinking.sample.faculty.api.event.StudentSubscribed;
 import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
@@ -21,7 +22,13 @@ public class Indexing {
                                       .register(StudentUnsubscribed.class, Indexing::index)
                                       .register(CourseCapacityChanged.class, Indexing::index)
                                       .register(CourseCreated.class, Indexing::index)
-                                      .register(StudentEnrolledFaculty.class, Indexing::index);
+                                      .register(StudentEnrolledFaculty.class, Indexing::index)
+                                      .register(CourseRenamed.class, Indexing::index);
+    }
+
+    public static Set<Index> index(CourseRenamed payload) {
+        return Set.of(typeIndex(CourseRenamed.NAME),
+                      courseIdIndex(payload.courseId()));
     }
 
     public static Set<Index> index(StudentEnrolledFaculty payload) {
