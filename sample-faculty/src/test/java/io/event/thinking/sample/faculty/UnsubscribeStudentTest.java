@@ -1,56 +1,59 @@
 package io.event.thinking.sample.faculty;
 
-import io.event.thinking.eventstore.api.EventStore;
-import io.event.thinking.eventstore.inmemory.InMemoryEventStore;
-import io.event.thinking.micro.es.LocalCommandBus;
+import io.event.thinking.micro.es.test.CommandModelFixture;
 import io.event.thinking.sample.faculty.api.command.UnsubscribeStudent;
+import io.event.thinking.sample.faculty.api.event.CourseCreated;
+import io.event.thinking.sample.faculty.api.event.StudentEnrolledFaculty;
+import io.event.thinking.sample.faculty.api.event.StudentSubscribed;
+import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 import io.event.thinking.sample.faculty.model.UnsubscribeStudentCommandModel;
 import org.junit.jupiter.api.*;
-import reactor.test.StepVerifier;
+
+import java.util.UUID;
+
+import static io.event.thinking.sample.faculty.Indexing.multiEventIndexer;
 
 class UnsubscribeStudentTest {
 
-    private EventStore eventStore;
-    private LocalCommandBus commandBus;
-
-    private Fixtures fixtures;
+    private CommandModelFixture<UnsubscribeStudent> fixture;
 
     @BeforeEach
     void setUp() {
-        eventStore = new InMemoryEventStore();
-        fixtures = new Fixtures(eventStore);
-        commandBus = new LocalCommandBus(eventStore);
-        commandBus.register(UnsubscribeStudent.class, UnsubscribeStudentCommandModel::new);
+        fixture = new CommandModelFixture<>(UnsubscribeStudent.class,
+                                            new UnsubscribeStudentCommandModel(),
+                                            multiEventIndexer());
     }
 
     @Test
     void successfulUnsubscribe() {
-        var studentId = fixtures.enrollStudent();
-        var courseId = fixtures.createCourse();
-        fixtures.subscribe(studentId, courseId);
+        var studentId = UUID.randomUUID().toString();
+        var courseId = UUID.randomUUID().toString();
 
-        StepVerifier.create(commandBus.dispatch(new UnsubscribeStudent(studentId, courseId)))
-                    .expectNext(3L)
-                    .verifyComplete();
+        fixture.given(new StudentEnrolledFaculty(studentId, "Novak", "Djokovic"),
+                      new CourseCreated(courseId, 1),
+                      new StudentSubscribed(studentId, courseId))
+               .when(new UnsubscribeStudent(studentId, courseId))
+               .expectEvents(new StudentUnsubscribed(studentId, courseId));
     }
 
     @Test
     void unsubscribeWithoutStudentBeingSubscribed() {
-        var studentId = fixtures.enrollStudent();
-        var courseId = fixtures.createCourse();
+        var courseId = UUID.randomUUID().toString();
+        var studentId = UUID.randomUUID().toString();
 
-        StepVerifier.create(commandBus.dispatch(new UnsubscribeStudent(studentId, courseId)))
-                    .verifyErrorMessage("Student is not subscribed to course");
+        fixture.givenNoEvents()
+               .when(new UnsubscribeStudent(studentId, courseId))
+               .expectException(RuntimeException.class, "Student is not subscribed to course");
     }
 
     @Test
     void unsubscribeAfterUnsubscription() {
-        var studentId = fixtures.enrollStudent();
-        var courseId = fixtures.createCourse();
-        fixtures.subscribe(studentId, courseId);
-        fixtures.unsubscribe(studentId, courseId);
+        var courseId = UUID.randomUUID().toString();
+        var studentId = UUID.randomUUID().toString();
 
-        StepVerifier.create(commandBus.dispatch(new UnsubscribeStudent(studentId, courseId)))
-                    .verifyErrorMessage("Student is not subscribed to course");
+        fixture.given(new StudentSubscribed(studentId, courseId),
+                      new StudentUnsubscribed(studentId, courseId))
+               .when(new UnsubscribeStudent(studentId, courseId))
+               .expectException(RuntimeException.class, "Student is not subscribed to course");
     }
 }
