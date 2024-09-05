@@ -15,8 +15,8 @@ import java.util.UUID;
 import static io.event.thinking.eventstore.api.Criteria.criteria;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.micro.es.Event.event;
-import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Tags.courseIdTag;
+import static io.event.thinking.micro.es.Indices.typeIndex;
+import static io.event.thinking.sample.faculty.model.Indices.courseIdIndex;
 
 class RenameStudentTest {
 
@@ -45,11 +45,11 @@ class RenameStudentTest {
                     .verifyComplete();
 
         var courseRenamed = event(new CourseRenamed(courseId, newName),
-                                  type(CourseRenamed.NAME),
-                                  courseIdTag(courseId));
-        StepVerifier.create(eventStore.read(criteria(criterion(type(CourseRenamed.NAME), courseIdTag(courseId))))
+                                  typeIndex(CourseRenamed.NAME),
+                                  courseIdIndex(courseId));
+        StepVerifier.create(eventStore.read(criteria(criterion(typeIndex(CourseRenamed.NAME), courseIdIndex(courseId))))
                                       .flux()
-                                      .map(s -> event(s.event().tags(), serializer.deserialize(s.event().payload()))))
+                                      .map(s -> event(s.event().indices(), serializer.deserialize(s.event().payload()))))
                     .expectNext(courseRenamed)
                     .verifyComplete();
     }
@@ -65,12 +65,12 @@ class RenameStudentTest {
                     .verifyComplete();
 
         var courseRenamed = event(new CourseRenamed(courseId, newName),
-                                  type(CourseRenamed.NAME),
-                                  courseIdTag(courseId));
-        StepVerifier.create(eventStore.read(criteria(criterion(type(CourseRenamed.NAME), courseIdTag(courseId))))
+                                  typeIndex(CourseRenamed.NAME),
+                                  courseIdIndex(courseId));
+        StepVerifier.create(eventStore.read(criteria(criterion(typeIndex(CourseRenamed.NAME), courseIdIndex(courseId))))
                                       .flux()
                                       .last()
-                                      .map(s -> event(s.event().tags(), serializer.deserialize(s.event().payload()))))
+                                      .map(s -> event(s.event().indices(), serializer.deserialize(s.event().payload()))))
                     .expectNext(courseRenamed)
                     .verifyComplete();
     }

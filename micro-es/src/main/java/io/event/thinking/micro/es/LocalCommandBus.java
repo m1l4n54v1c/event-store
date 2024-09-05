@@ -77,7 +77,7 @@ public class LocalCommandBus implements CommandBus {
 
     private Event deserialize(io.event.thinking.eventstore.api.Event e) {
         Object payload = serializer.deserialize(e.payload());
-        return Event.event(e.tags(), payload);
+        return Event.event(e.indices(), payload);
     }
 
     private List<io.event.thinking.eventstore.api.Event> serialize(List<Event> events) {
@@ -88,7 +88,7 @@ public class LocalCommandBus implements CommandBus {
 
     private io.event.thinking.eventstore.api.Event serialize(Event e) {
         byte[] payload = serializer.serialize(e.payload());
-        return event(e.tags(), payload);
+        return event(e.indices(), payload);
     }
 
     private <T> CommandModel<T> applyEvent(CommandModel<T> model, Event event) {
