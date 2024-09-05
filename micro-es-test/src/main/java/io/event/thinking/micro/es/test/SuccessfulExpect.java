@@ -46,7 +46,7 @@ public class SuccessfulExpect implements Expect {
     @Override
     public void expectEvents(Event... events) {
         if (!Arrays.stream(events).toList().equals(publishedEvents())) {
-            throw new AssertionError("Expected " + publishedEvents() + " but got " + Arrays.toString(events));
+            throw new AssertionError("Expected " + Arrays.toString(events) + " but got " + publishedEvents());
         }
     }
 
