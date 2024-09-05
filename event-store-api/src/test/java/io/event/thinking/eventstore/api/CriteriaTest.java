@@ -6,83 +6,83 @@ import java.util.Set;
 
 import static io.event.thinking.eventstore.api.Criteria.criteria;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
-import static io.event.thinking.eventstore.api.Tag.tag;
+import static io.event.thinking.eventstore.api.Index.index;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CriteriaTest {
 
     @Test
-    void emptyCriteriaMatchWithNoTags() {
+    void emptyCriteriaMatchWithNoIndices() {
         var criteria = criteria();
 
         assertTrue(criteria.matches());
     }
 
     @Test
-    void emptyCriteriaMatchWithTags() {
+    void emptyCriteriaMatchWithIndices() {
         var criteria = criteria();
 
-        assertTrue(criteria.matches(tag("key", "value")));
+        assertTrue(criteria.matches(index("key", "value")));
     }
 
     @Test
-    void criteriaMatchWithNoTags() {
-        var criteria = criteria(criterion(tag("key", "value")));
+    void criteriaMatchWithNoIndices() {
+        var criteria = criteria(criterion(index("key", "value")));
 
         assertFalse(criteria.matches());
     }
 
     @Test
-    void criteriaExactMatchWithTag() {
-        var tag = tag("key", "value");
-        var criteria = criteria(criterion(tag));
+    void criteriaExactMatchWithIndex() {
+        var index = index("key", "value");
+        var criteria = criteria(criterion(index));
 
-        assertTrue(criteria.matches(tag));
+        assertTrue(criteria.matches(index));
     }
 
     @Test
-    void criteriaExactMatchWithTags() {
-        var tags = Set.of(tag("key1", "value1"), tag("key2", "value2"));
-        var criteria = criteria(criterion(tags));
+    void criteriaExactMatchWithIndices() {
+        var indices = Set.of(index("key1", "value1"), index("key2", "value2"));
+        var criteria = criteria(criterion(indices));
 
-        assertTrue(criteria.matches(tags));
+        assertTrue(criteria.matches(indices));
     }
 
     @Test
-    void criteriaDoesntMatchWithLessTags() {
-        var tag1 = tag("key1", "value1");
-        var tags = Set.of(tag1, tag("key2", "value2"));
-        var criteria = criteria(criterion(tags));
+    void criteriaDoesntMatchWithLessIndices() {
+        var index1 = index("key1", "value1");
+        var indices = Set.of(index1, index("key2", "value2"));
+        var criteria = criteria(criterion(indices));
 
-        assertFalse(criteria.matches(tag1));
+        assertFalse(criteria.matches(index1));
     }
 
     @Test
-    void criteriaMatchesWithMoreTags() {
-        var tag1 = tag("key1", "value1");
-        var tags = Set.of(tag1, tag("key2", "value2"));
-        var criteria = criteria(criterion(tag1));
+    void criteriaMatchesWithMoreIndices() {
+        var index1 = index("key1", "value1");
+        var indices = Set.of(index1, index("key2", "value2"));
+        var criteria = criteria(criterion(index1));
 
-        assertTrue(criteria.matches(tags));
+        assertTrue(criteria.matches(indices));
     }
 
     @Test
-    void criteriaDoesntMatchWithDifferentTags() {
-        var tag1 = tag("key1", "value1");
-        var tag2 = tag("key2", "value2");
-        var criteria = criteria(criterion(tag1));
+    void criteriaDoesntMatchWithDifferentIndices() {
+        var index1 = index("key1", "value1");
+        var index2 = index("key2", "value2");
+        var criteria = criteria(criterion(index1));
 
-        assertFalse(criteria.matches(tag2));
+        assertFalse(criteria.matches(index2));
     }
 
     @Test
-    void criteriaDoesntMatchWithOneCommonTag() {
-        var tag1 = tag("key1", "value1");
-        var tag2 = tag("key2", "value2");
-        var tag3 = tag("key3", "value3");
-        var criteria = criteria(criterion(tag1, tag2));
+    void criteriaDoesntMatchWithOneCommonIndex() {
+        var index1 = index("key1", "value1");
+        var index2 = index("key2", "value2");
+        var index3 = index("key3", "value3");
+        var criteria = criteria(criterion(index1, index2));
 
-        assertFalse(criteria.matches(tag1, tag3));
+        assertFalse(criteria.matches(index1, index3));
     }
 }

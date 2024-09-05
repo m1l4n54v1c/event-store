@@ -15,7 +15,7 @@ import static io.event.thinking.eventstore.api.ConsistencyCondition.consistencyC
 import static io.event.thinking.eventstore.api.Criteria.criteria;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.eventstore.api.SequencedEvent.sequencedEvent;
-import static io.event.thinking.eventstore.api.Tag.tag;
+import static io.event.thinking.eventstore.api.Index.index;
 import static io.event.thinking.eventstore.api.Event.event;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -59,12 +59,12 @@ class InMemoryEventStoreTest {
 
     @Test
     void multipleAppendsWithNonConflictingCondition() {
-        var tag1 = tag("key1", "value1");
-        var tag2 = tag("key2", "value2");
-        var event1 = event(emptyPayload(), tag1);
-        var event2 = event(emptyPayload(), tag2);
-        var consistencyCondition1 = consistencyCondition(-1L, criteria(criterion(tag1)));
-        var consistencyCondition2 = consistencyCondition(0L, criteria(criterion(tag2)));
+        var index1 = index("key1", "value1");
+        var index2 = index("key2", "value2");
+        var event1 = event(emptyPayload(), index1);
+        var event2 = event(emptyPayload(), index2);
+        var consistencyCondition1 = consistencyCondition(-1L, criteria(criterion(index1)));
+        var consistencyCondition2 = consistencyCondition(0L, criteria(criterion(index2)));
 
         var appends = Flux.merge(eventStore.append(event1, consistencyCondition1),
                                  eventStore.append(event2, consistencyCondition2));
@@ -74,12 +74,12 @@ class InMemoryEventStoreTest {
     }
 
     @Test
-    void multipleAppendsWithConflictingTagsAndCorrectConsistencyMarker() {
-        var tag = tag("key", "value");
-        var event1 = event(emptyPayload(), tag);
-        var event2 = event(emptyPayload(), tag);
-        var consistencyCondition1 = consistencyCondition(0L, criteria(criterion(tag)));
-        var consistencyCondition2 = consistencyCondition(1L, criteria(criterion(tag)));
+    void multipleAppendsWithConflictingIndicessAndCorrectConsistencyMarker() {
+        var index = index("key", "value");
+        var event1 = event(emptyPayload(), index);
+        var event2 = event(emptyPayload(), index);
+        var consistencyCondition1 = consistencyCondition(0L, criteria(criterion(index)));
+        var consistencyCondition2 = consistencyCondition(1L, criteria(criterion(index)));
 
         var appends = Flux.merge(eventStore.append(event1, consistencyCondition1),
                                  eventStore.append(event2, consistencyCondition2));
@@ -90,9 +90,9 @@ class InMemoryEventStoreTest {
 
     @Test
     void multipleAppendsWithConflictingCondition() {
-        var tag = tag("key", "value");
-        var event = event(emptyPayload(), tag);
-        var consistencyCondition = consistencyCondition(-1L, criteria(criterion(tag)));
+        var index = index("key", "value");
+        var event = event(emptyPayload(), index);
+        var consistencyCondition = consistencyCondition(-1L, criteria(criterion(index)));
 
         var appends = Flux.merge(eventStore.append(event, consistencyCondition),
                                  eventStore.append(event, consistencyCondition));
@@ -139,7 +139,7 @@ class InMemoryEventStoreTest {
 
     @Test
     void readFromEmptyEventStore() {
-        var source = eventStore.read(criteria(criterion(tag("key", "value"))));
+        var source = eventStore.read(criteria(criterion(index("key", "value"))));
 
         assertEquals(0L, source.consistencyMarker());
         StepVerifier.create(source.flux())
@@ -148,10 +148,10 @@ class InMemoryEventStoreTest {
 
     @Test
     void read() {
-        var tag1 = tag("key1", "value1");
-        var tag2 = tag("key2", "value2");
-        var event1 = event(payload("event1"), tag1);
-        var event2 = event(payload("event2"), tag2);
+        var index1 = index("key1", "value1");
+        var index2 = index("key2", "value2");
+        var event1 = event(payload("event1"), index1);
+        var event2 = event(payload("event2"), index2);
 
         var appends = Flux.merge(eventStore.append(event1),
                                  eventStore.append(event2),
@@ -162,7 +162,7 @@ class InMemoryEventStoreTest {
                     .expectNext(0L, 1L, 2L, 3L, 4L)
                     .verifyComplete();
 
-        var source1 = eventStore.read(criteria(criterion(tag1)));
+        var source1 = eventStore.read(criteria(criterion(index1)));
         assertEquals(5L, source1.consistencyMarker());
         StepVerifier.create(source1.flux())
                     .expectNext(sequencedEvent(0L, event1),
@@ -173,7 +173,7 @@ class InMemoryEventStoreTest {
         StepVerifier.create(eventStore.append(event2))
                     .expectNext(5L)
                     .verifyComplete();
-        var source2 = eventStore.read(criteria(criterion(tag2)));
+        var source2 = eventStore.read(criteria(criterion(index2)));
         assertEquals(6L, source2.consistencyMarker());
         StepVerifier.create(source2.flux())
                     .expectNext(sequencedEvent(1L, event2),
@@ -191,8 +191,8 @@ class InMemoryEventStoreTest {
 
     @Test
     void readWithNullCriteria() {
-        var tag = tag("key", "value");
-        var event = event(payload("event"), tag);
+        var index = index("key", "value");
+        var event = event(payload("event"), index);
         eventStore.append(event)
                   .block();
 
@@ -205,10 +205,10 @@ class InMemoryEventStoreTest {
 
     @Test
     void readAllEvents() {
-        var tag = tag("key", "value");
-        var event1 = event(payload("event1"), tag);
-        var event2 = event(payload("event2"), tag);
-        var event3 = event(payload("event3"), tag);
+        var index = index("key", "value");
+        var event1 = event(payload("event1"), index);
+        var event2 = event(payload("event2"), index);
+        var event3 = event(payload("event3"), index);
         var appends = Flux.merge(eventStore.append(event1),
                                  eventStore.append(event2),
                                  eventStore.append(event3));
@@ -226,10 +226,10 @@ class InMemoryEventStoreTest {
 
     @Test
     void readFromSeq() {
-        var tag = tag("key", "value");
-        var event1 = event(payload("event1"), tag);
-        var event2 = event(payload("event2"), tag);
-        var event3 = event(payload("event3"), tag);
+        var index = index("key", "value");
+        var event1 = event(payload("event1"), index);
+        var event2 = event(payload("event2"), index);
+        var event3 = event(payload("event3"), index);
         var appends = Flux.merge(eventStore.append(event1),
                                  eventStore.append(event2),
                                  eventStore.append(event3));
@@ -246,10 +246,10 @@ class InMemoryEventStoreTest {
 
     @Test
     void readFromInvalidSeq() {
-        var tag = tag("key", "value");
-        var event1 = event(payload("event1"), tag);
-        var event2 = event(payload("event2"), tag);
-        var event3 = event(payload("event3"), tag);
+        var index = index("key", "value");
+        var event1 = event(payload("event1"), index);
+        var event2 = event(payload("event2"), index);
+        var event3 = event(payload("event3"), index);
         var appends = Flux.merge(eventStore.append(event1),
                                  eventStore.append(event2),
                                  eventStore.append(event3));
