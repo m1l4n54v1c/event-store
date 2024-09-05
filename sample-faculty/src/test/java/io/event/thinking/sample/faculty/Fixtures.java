@@ -13,9 +13,9 @@ import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 import java.util.UUID;
 
 import static io.event.thinking.eventstore.api.Event.event;
-import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Tags.courseIdTag;
-import static io.event.thinking.sample.faculty.model.Tags.studentIdTag;
+import static io.event.thinking.micro.es.Indices.typeIndex;
+import static io.event.thinking.sample.faculty.model.Indices.courseIdIndex;
+import static io.event.thinking.sample.faculty.model.Indices.studentIdIndex;
 
 public class Fixtures {
 
@@ -35,8 +35,8 @@ public class Fixtures {
     String enrollStudent() {
         var studentId = UUID.randomUUID().toString();
         eventStore.append(event(serializer.serialize(new StudentEnrolledFaculty(studentId, "Name", "Lastname")),
-                                type(StudentEnrolledFaculty.NAME),
-                                studentIdTag(studentId)))
+                                typeIndex(StudentEnrolledFaculty.NAME),
+                                studentIdIndex(studentId)))
                   .block();
         return studentId;
     }
@@ -56,25 +56,25 @@ public class Fixtures {
     String createCourse(int capacity, String name) {
         var courseId = UUID.randomUUID().toString();
         eventStore.append(event(serializer.serialize(new CourseCreated(courseId, name, capacity)),
-                                type(CourseCreated.NAME),
-                                courseIdTag(courseId)))
+                                typeIndex(CourseCreated.NAME),
+                                courseIdIndex(courseId)))
                   .block();
         return courseId;
     }
 
     void subscribe(String studentId, String courseId) {
         eventStore.append(event(serializer.serialize(new StudentSubscribed(studentId, courseId)),
-                                type(StudentSubscribed.NAME),
-                                studentIdTag(studentId),
-                                courseIdTag(courseId)))
+                                typeIndex(StudentSubscribed.NAME),
+                                studentIdIndex(studentId),
+                                courseIdIndex(courseId)))
                   .block();
     }
 
     void unsubscribe(String studentId, String courseId) {
         eventStore.append(event(serializer.serialize(new StudentUnsubscribed(studentId, courseId)),
-                                type(StudentUnsubscribed.NAME),
-                                studentIdTag(studentId),
-                                courseIdTag(courseId)))
+                                typeIndex(StudentUnsubscribed.NAME),
+                                studentIdIndex(studentId),
+                                courseIdIndex(courseId)))
                   .block();
     }
 
@@ -85,8 +85,8 @@ public class Fixtures {
 
     Event courseRenamedEvent(String courseId, String newCourseName) {
         return event(serializer.serialize(new CourseRenamed(courseId, newCourseName)),
-                     type(CourseRenamed.NAME),
-                     courseIdTag(courseId));
+                     typeIndex(CourseRenamed.NAME),
+                     courseIdIndex(courseId));
     }
 
     void changeCourseCapacity(String courseId, int newCapacity){
@@ -96,7 +96,7 @@ public class Fixtures {
 
     Event courseCapacityChangedEvent(String courseId, int newCapacity) {
         return event(serializer.serialize(new CourseCapacityChanged(courseId, newCapacity)),
-                     type(CourseCapacityChanged.NAME),
-                     courseIdTag(courseId));
+                     typeIndex(CourseCapacityChanged.NAME),
+                     courseIdIndex(courseId));
     }
 }
