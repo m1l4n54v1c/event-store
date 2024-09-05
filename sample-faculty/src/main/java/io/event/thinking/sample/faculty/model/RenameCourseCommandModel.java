@@ -17,21 +17,28 @@ import static io.event.thinking.sample.faculty.model.Indices.courseIdIndex;
 public class RenameCourseCommandModel implements CommandModel<RenameCourse> {
 
     private String courseId;
+    private String courseName;
 
     @Override
     public Criteria criteria(RenameCourse command) {
-        return Criteria.criteria(criterion(typeIndex(CourseCreated.NAME),
-                                           courseIdIndex(command.courseId())));
+        return Criteria.criteria(criterion(typeIndex(CourseCreated.NAME), courseIdIndex(command.courseId())),
+                                 criterion(typeIndex(CourseRenamed.NAME), courseIdIndex(command.courseId())));
     }
 
     private void on(CourseCreated evt) {
         courseId = evt.id();
+        courseName = evt.name();
+    }
+
+    private void on(CourseRenamed evt) {
+        courseName = evt.newName();
     }
 
     @Override
     public void onEvent(Event event) {
         switch (event.payload()) {
             case CourseCreated e -> on(e);
+            case CourseRenamed e -> on(e);
             default -> throw new RuntimeException("No handler for this event");
         }
     }
@@ -40,6 +47,9 @@ public class RenameCourseCommandModel implements CommandModel<RenameCourse> {
     public List<Event> handle(RenameCourse command) {
         if (courseId == null) {
             throw new RuntimeException("Course with given id does not exist");
+        }
+        if (command.newName().equals(courseName)) {
+            throw new RuntimeException("Course already has this name");
         }
         return List.of(tagEvent(new CourseRenamed(courseId, command.newName())));
     }

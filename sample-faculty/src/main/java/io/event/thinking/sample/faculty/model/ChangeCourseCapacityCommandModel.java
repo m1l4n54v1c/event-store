@@ -47,7 +47,7 @@ public class ChangeCourseCapacityCommandModel implements CommandModel<ChangeCour
     @Override
     public List<Event> handle(ChangeCourseCapacity command) {
         if (command.newCapacity() < 0) {
-            throw new RuntimeException("Course with given id does not exist");
+            throw new RuntimeException("Course capacity cannot be negative");
         }
 
         if (courseId == null) {
@@ -55,25 +55,21 @@ public class ChangeCourseCapacityCommandModel implements CommandModel<ChangeCour
         }
 
         List<Event> events = new ArrayList<>();
-        events.add(tagEvent(new CourseCapacityChanged(command.courseId(), command.newCapacity())));
+        var courseCapacityChanged = new CourseCapacityChanged(command.courseId(), command.newCapacity());
+        events.add(event(courseCapacityChanged,
+                         typeIndex(CourseCapacityChanged.NAME),
+                         courseIdIndex(courseCapacityChanged.id())));
         if (command.newCapacity() < subscribedStudents.size()) {
             subscribedStudents.subList(command.newCapacity(), subscribedStudents.size())
-                              .forEach(studentId -> events.add(tagEvent(new StudentUnsubscribed(studentId, courseId))));
+                              .forEach(studentId -> {
+                                  var studentSubscribed = new StudentUnsubscribed(studentId, courseId);
+                                  events.add(event(studentSubscribed,
+                                                   typeIndex(StudentUnsubscribed.NAME),
+                                                   courseIdIndex(studentSubscribed.courseId()),
+                                                   studentIdIndex(studentSubscribed.studentId())));
+                              });
         }
         return events;
-    }
-
-    private static Event tagEvent(CourseCapacityChanged event) {
-        return event(event,
-                     typeIndex(CourseCapacityChanged.NAME),
-                     courseIdIndex(event.id()));
-    }
-
-    private static Event tagEvent(StudentUnsubscribed event) {
-        return event(event,
-                     typeIndex(StudentUnsubscribed.NAME),
-                     courseIdIndex(event.courseId()),
-                     studentIdIndex(event.studentId()));
     }
 
     @Override
