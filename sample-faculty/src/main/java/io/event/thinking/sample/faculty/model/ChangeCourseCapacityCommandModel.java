@@ -15,9 +15,9 @@ import java.util.List;
 
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.micro.es.Event.event;
-import static io.event.thinking.micro.es.Tags.type;
-import static io.event.thinking.sample.faculty.model.Tags.courseIdTag;
-import static io.event.thinking.sample.faculty.model.Tags.studentIdTag;
+import static io.event.thinking.micro.es.Indices.typeIndex;
+import static io.event.thinking.sample.faculty.model.Indices.courseIdIndex;
+import static io.event.thinking.sample.faculty.model.Indices.studentIdIndex;
 
 public class ChangeCourseCapacityCommandModel implements CommandModel<ChangeCourseCapacity> {
 
@@ -26,9 +26,9 @@ public class ChangeCourseCapacityCommandModel implements CommandModel<ChangeCour
 
     @Override
     public Criteria criteria(ChangeCourseCapacity cmd) {
-        return Criteria.criteria(criterion(type(CourseCreated.NAME), courseIdTag(cmd.courseId())),
-                                 criterion(type(StudentSubscribed.NAME), courseIdTag(cmd.courseId())),
-                                 criterion(type(StudentUnsubscribed.NAME), courseIdTag(cmd.courseId())));
+        return Criteria.criteria(criterion(typeIndex(CourseCreated.NAME), courseIdIndex(cmd.courseId())),
+                                 criterion(typeIndex(StudentSubscribed.NAME), courseIdIndex(cmd.courseId())),
+                                 criterion(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(cmd.courseId())));
     }
 
     void on(CourseCreated evt) {
@@ -65,15 +65,15 @@ public class ChangeCourseCapacityCommandModel implements CommandModel<ChangeCour
 
     private static Event tagEvent(CourseCapacityChanged event) {
         return event(event,
-                     type(CourseCapacityChanged.NAME),
-                     courseIdTag(event.id()));
+                     typeIndex(CourseCapacityChanged.NAME),
+                     courseIdIndex(event.id()));
     }
 
     private static Event tagEvent(StudentUnsubscribed event) {
         return event(event,
-                     type(StudentUnsubscribed.NAME),
-                     courseIdTag(event.courseId()),
-                     studentIdTag(event.studentId()));
+                     typeIndex(StudentUnsubscribed.NAME),
+                     courseIdIndex(event.courseId()),
+                     studentIdIndex(event.studentId()));
     }
 
     @Override
