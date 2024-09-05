@@ -13,6 +13,7 @@
         <module>micro-es</module>
         <module>sample-faculty</module>
         <module>event-store-api</module>
+        <module>micro-es-test</module>
     </modules>
 
     <properties>
@@ -40,6 +41,12 @@
             <dependency>
                 <groupId>io.event.thinking</groupId>
                 <artifactId>micro-es</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.event.thinking</groupId>
+                <artifactId>micro-es-test</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
