@@ -11,8 +11,8 @@ import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 import java.util.Set;
 
 import static io.event.thinking.micro.es.Indices.typeIndex;
-import static io.event.thinking.sample.faculty.model.Indices.courseIdIndex;
-import static io.event.thinking.sample.faculty.model.Indices.studentIdIndex;
+import static io.event.thinking.sample.faculty.commandhandler.Indices.courseIdIndex;
+import static io.event.thinking.sample.faculty.commandhandler.Indices.studentIdIndex;
 
 public class Indexing {
 

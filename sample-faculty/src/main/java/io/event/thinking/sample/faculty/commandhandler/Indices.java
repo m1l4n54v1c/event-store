@@ -1,4 +1,4 @@
-package io.event.thinking.sample.faculty.model;
+package io.event.thinking.sample.faculty.commandhandler;
 
 import io.event.thinking.eventstore.api.Index;
 
