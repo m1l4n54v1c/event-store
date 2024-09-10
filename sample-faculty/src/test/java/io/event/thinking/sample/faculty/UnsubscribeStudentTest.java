@@ -1,12 +1,12 @@
 package io.event.thinking.sample.faculty;
 
-import io.event.thinking.micro.es.test.CommandModelFixture;
+import io.event.thinking.micro.es.test.CommandHandlerFixture;
 import io.event.thinking.sample.faculty.api.command.UnsubscribeStudent;
 import io.event.thinking.sample.faculty.api.event.CourseCreated;
 import io.event.thinking.sample.faculty.api.event.StudentEnrolledFaculty;
 import io.event.thinking.sample.faculty.api.event.StudentSubscribed;
 import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
-import io.event.thinking.sample.faculty.model.UnsubscribeStudentCommandModel;
+import io.event.thinking.sample.faculty.commandhandler.UnsubscribeStudentCommandHandler;
 import org.junit.jupiter.api.*;
 
 import java.util.UUID;
@@ -15,13 +15,13 @@ import static io.event.thinking.sample.faculty.Indexing.multiEventIndexer;
 
 class UnsubscribeStudentTest {
 
-    private CommandModelFixture<UnsubscribeStudent> fixture;
+    private CommandHandlerFixture<UnsubscribeStudent> fixture;
 
     @BeforeEach
     void setUp() {
-        fixture = new CommandModelFixture<>(UnsubscribeStudent.class,
-                                            new UnsubscribeStudentCommandModel(),
-                                            multiEventIndexer());
+        fixture = new CommandHandlerFixture<>(UnsubscribeStudent.class,
+                                              new UnsubscribeStudentCommandHandler(),
+                                              multiEventIndexer());
     }
 
     @Test

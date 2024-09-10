@@ -2,16 +2,14 @@ package io.event.thinking.micro.es;
 
 import reactor.core.publisher.Mono;
 
-import java.util.function.Supplier;
-
 /**
- * A bus for dispatching commands to the corresponding {@link CommandModel}.
+ * A bus for dispatching commands to the corresponding {@link DcbCommandHandler}.
  */
 public interface CommandBus {
 
     /**
-     * Dispatches given {@code command} to the corresponding {@link CommandModel}, if any. Otherwise, returns an errored
-     * {@link Mono}.
+     * Dispatches given {@code command} to the corresponding {@link DcbCommandHandler}, if any. Otherwise, returns an
+     * errored {@link Mono}.
      *
      * @param command the command
      * @param <T>     the type of the command
@@ -20,11 +18,13 @@ public interface CommandBus {
     <T> Mono<Long> dispatch(T command);
 
     /**
-     * Registers a factory for the {@link CommandModel} able to handle a command of given {@code commandType}.
+     * Registers a factory for the {@link DcbCommandHandler} able to handle a command of given {@code commandType}.
      *
-     * @param commandType  the type of the command this model is able to handle
-     * @param modelFactory the factory to create a fresh {@link CommandModel}
-     * @param <T>          the type of the command
+     * @param commandType the type of the command this model is able to handle
+     * @param handler     the handler of the command that is going to use event sourcing to build the state necessary to
+     *                    make the decision
+     * @param <C>         the type of the command
+     * @param <S>         the type of the state necessary for the command handler to make the decision
      */
-    <T> void register(Class<T> commandType, Supplier<CommandModel<T>> modelFactory);
+    <C, S> void register(Class<C> commandType, DcbCommandHandler<C, S> handler);
 }

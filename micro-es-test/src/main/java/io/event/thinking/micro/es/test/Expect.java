@@ -5,7 +5,7 @@ import io.event.thinking.micro.es.Event;
 /**
  * Assertion of command handling.
  *
- * @see CommandModelFixture
+ * @see CommandHandlerFixture
  */
 public interface Expect {
 
