@@ -39,7 +39,11 @@ public class SubscribeStudentCommandHandler
 
     @Override
     public List<Event> handle(SubscribeStudent cmd, State state) {
-        state.assertState();
+        state.assertStudentEnrolledFaculty();
+        state.assertCourseExists();
+        state.assertStudentNotAlreadySubscribed();
+        state.assertEnoughVacantSpotsInCourse();
+        state.assertStudentNotSubscribedToTooManyCourses();
         StudentSubscribed payload = new StudentSubscribed(cmd.studentId(), cmd.courseId());
         return List.of(event(payload,
                              typeIndex(StudentSubscribed.NAME),
@@ -47,7 +51,6 @@ public class SubscribeStudentCommandHandler
                              courseIdIndex(payload.courseId())));
     }
 
-    // This would be done by the framework for you
     @Override
     public State source(Object event, State state) {
         return switch (event) {
@@ -105,21 +108,33 @@ public class SubscribeStudentCommandHandler
             return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, evt.capacity(), alreadySubscribed);
         }
 
-        public void assertState() {
+        public void assertStudentEnrolledFaculty() {
             if (studentId == null) {
                 throw new RuntimeException("Student with given id never enrolled the faculty");
             }
-            if (courseId == null) {
-                throw new RuntimeException("Course with given id does not exist");
+        }
+
+        private void assertStudentNotSubscribedToTooManyCourses() {
+            if (noOfCoursesStudentSubscribed == MAX_COURSES_PER_STUDENT) {
+                throw new RuntimeException("Student subscribed to too many courses");
             }
-            if (alreadySubscribed) {
-                throw new RuntimeException("Student already subscribed to this course");
-            }
+        }
+
+        private void assertEnoughVacantSpotsInCourse() {
             if (noOfStudentsSubscribedToCourse == courseCapacity) {
                 throw new RuntimeException("Course is fully booked");
             }
-            if (noOfCoursesStudentSubscribed == MAX_COURSES_PER_STUDENT) {
-                throw new RuntimeException("Student subscribed to too many courses");
+        }
+
+        private void assertStudentNotAlreadySubscribed() {
+            if (alreadySubscribed) {
+                throw new RuntimeException("Student already subscribed to this course");
+            }
+        }
+
+        private void assertCourseExists() {
+            if (courseId == null) {
+                throw new RuntimeException("Course with given id does not exist");
             }
         }
     }

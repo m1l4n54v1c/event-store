@@ -35,7 +35,7 @@ public class UnsubscribeStudentCommandHandler implements
 
     @Override
     public List<Event> handle(UnsubscribeStudent cmd, State state) {
-        state.assertState();
+        state.assertStudentSubscribed();
         StudentUnsubscribed payload = new StudentUnsubscribed(cmd.studentId(), cmd.courseId());
         return List.of(event(payload,
                              typeIndex(StudentUnsubscribed.NAME),
@@ -43,7 +43,6 @@ public class UnsubscribeStudentCommandHandler implements
                              courseIdIndex(payload.courseId())));
     }
 
-    // This would be done by the framework for you
     @Override
     public State source(Object event, State state) {
         return switch (event) {
@@ -56,7 +55,7 @@ public class UnsubscribeStudentCommandHandler implements
 
     public record State(boolean subscribed) {
 
-        public void assertState() {
+        public void assertStudentSubscribed() {
             if (!subscribed) {
                 throw new RuntimeException("Student is not subscribed to course");
             }
