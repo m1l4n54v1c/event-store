@@ -1,10 +1,10 @@
 package io.event.thinking.sample.faculty;
 
-import io.event.thinking.micro.es.test.CommandModelFixture;
+import io.event.thinking.micro.es.test.CommandHandlerFixture;
 import io.event.thinking.sample.faculty.api.command.RenameCourse;
 import io.event.thinking.sample.faculty.api.event.CourseCreated;
 import io.event.thinking.sample.faculty.api.event.CourseRenamed;
-import io.event.thinking.sample.faculty.model.RenameCourseCommandModel;
+import io.event.thinking.sample.faculty.commandhandler.RenameCourseCommandHandler;
 import org.junit.jupiter.api.*;
 
 import java.util.UUID;
@@ -13,13 +13,13 @@ import static io.event.thinking.sample.faculty.Indexing.multiEventIndexer;
 
 class RenameCourseTest {
 
-    private CommandModelFixture<RenameCourse> fixture;
+    private CommandHandlerFixture<RenameCourse> fixture;
 
     @BeforeEach
     void setUp() {
-        fixture = new CommandModelFixture<>(RenameCourse.class,
-                                            new RenameCourseCommandModel(),
-                                            multiEventIndexer());
+        fixture = new CommandHandlerFixture<>(RenameCourse.class,
+                                              new RenameCourseCommandHandler(),
+                                              multiEventIndexer());
     }
 
     @Test

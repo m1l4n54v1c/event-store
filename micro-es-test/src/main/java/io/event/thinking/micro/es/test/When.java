@@ -5,11 +5,11 @@ import io.event.thinking.micro.es.CommandBus;
 import io.event.thinking.micro.es.Serializer;
 
 /**
- * Command handler invoker. Invokes the {@link io.event.thinking.micro.es.CommandModel#handle(Object)} after the
- * {@link io.event.thinking.micro.es.CommandModel} is sourced.
+ * Command handler invoker. Invokes the {@link io.event.thinking.micro.es.DcbCommandHandler#handle(Object, Object)}
+ * after the {@link io.event.thinking.micro.es.DcbCommandHandler} is sourced.
  *
  * @param <T> the type of the command
- * @see CommandModelFixture
+ * @see CommandHandlerFixture
  */
 public class When<T> {
 
@@ -39,7 +39,7 @@ public class When<T> {
     }
 
     /**
-     * Dispatches the command to the sourced {@link io.event.thinking.micro.es.CommandModel}.
+     * Dispatches the command to the sourced {@link io.event.thinking.micro.es.DcbCommandHandler}.
      *
      * @param command the command
      * @return assertions
