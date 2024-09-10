@@ -1,14 +1,14 @@
 package io.event.thinking.sample.faculty;
 
-import io.event.thinking.micro.es.test.CommandModelFixture;
+import io.event.thinking.micro.es.test.CommandHandlerFixture;
 import io.event.thinking.sample.faculty.api.command.ChangeCourseCapacity;
 import io.event.thinking.sample.faculty.api.event.CourseCapacityChanged;
 import io.event.thinking.sample.faculty.api.event.CourseCreated;
 import io.event.thinking.sample.faculty.api.event.StudentEnrolledFaculty;
 import io.event.thinking.sample.faculty.api.event.StudentSubscribed;
 import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
-import io.event.thinking.sample.faculty.model.ChangeCourseCapacityCommandModel;
-import io.event.thinking.sample.faculty.model.Indices;
+import io.event.thinking.sample.faculty.commandhandler.ChangeCourseCapacityCommandHandler;
+import io.event.thinking.sample.faculty.commandhandler.Indices;
 import org.junit.jupiter.api.*;
 
 import java.util.UUID;
@@ -19,13 +19,13 @@ import static io.event.thinking.sample.faculty.Indexing.multiEventIndexer;
 
 class ChangeCourseCapacityTest {
 
-    private CommandModelFixture<ChangeCourseCapacity> fixture;
+    private CommandHandlerFixture<ChangeCourseCapacity> fixture;
 
     @BeforeEach
     void setUp() {
-        fixture = new CommandModelFixture<>(ChangeCourseCapacity.class,
-                                            new ChangeCourseCapacityCommandModel(),
-                                            multiEventIndexer());
+        fixture = new CommandHandlerFixture<>(ChangeCourseCapacity.class,
+                                              new ChangeCourseCapacityCommandHandler(),
+                                              multiEventIndexer());
     }
 
     @Test
