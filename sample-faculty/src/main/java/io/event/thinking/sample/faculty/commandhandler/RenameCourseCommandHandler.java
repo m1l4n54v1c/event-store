@@ -9,6 +9,11 @@ import java.util.List;
 
 public class RenameCourseCommandHandler implements DcbCommandHandler<RenameCourse, RenameCourseCommandHandler.State> {
 
+    /*
+        Filter for events, that state whether
+        - this course has been created
+        - this course has been renamed
+     */
     @Override
     public Criteria criteria(RenameCourse command) {
         return null;

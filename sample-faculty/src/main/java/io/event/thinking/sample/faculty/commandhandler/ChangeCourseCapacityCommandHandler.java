@@ -9,6 +9,12 @@ import java.util.List;
 
 public class ChangeCourseCapacityCommandHandler implements DcbCommandHandler<ChangeCourseCapacity, ChangeCourseCapacityCommandHandler.State> {
 
+    /*
+        We need all events, that show
+        - this course has been created
+        - any student has subscribed to this course
+        - any student has unsubscribed from this course
+     */
     @Override
     public Criteria criteria(ChangeCourseCapacity command) {
         return null;
