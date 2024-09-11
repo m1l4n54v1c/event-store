@@ -21,15 +21,30 @@ import static io.event.thinking.sample.faculty.commandhandler.Indices.studentIdI
 public class SubscribeStudentCommandHandler
         implements DcbCommandHandler<SubscribeStudent, SubscribeStudentCommandHandler.State> {
 
+    /*
+        We need all events, that show
+        - this student has been enrolled
+        - this course has been created
+        - this course capacity was changed
+        - all subscriptions or unsubscriptions that concern either this course or student
+     */
     @Override
     public Criteria criteria(SubscribeStudent cmd) {
-        return Criteria.criteria(criterion(typeIndex(StudentEnrolledFaculty.NAME), studentIdIndex(cmd.studentId())),
-                                 criterion(typeIndex(CourseCreated.NAME), courseIdIndex(cmd.courseId())),
-                                 criterion(typeIndex(CourseCapacityChanged.NAME), courseIdIndex(cmd.courseId())),
-                                 criterion(typeIndex(StudentSubscribed.NAME), courseIdIndex(cmd.courseId())),
-                                 criterion(typeIndex(StudentSubscribed.NAME), studentIdIndex(cmd.studentId())),
-                                 criterion(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(cmd.courseId())),
-                                 criterion(typeIndex(StudentUnsubscribed.NAME), studentIdIndex(cmd.studentId())));
+        return Criteria.criteria(
+                // this student has enrolled
+                criterion(typeIndex(StudentEnrolledFaculty.NAME), studentIdIndex(cmd.studentId())),
+                // this course has been created
+                criterion(typeIndex(CourseCreated.NAME), courseIdIndex(cmd.courseId())),
+                // the capacity of this course has been changed
+                criterion(typeIndex(CourseCapacityChanged.NAME), courseIdIndex(cmd.courseId())),
+                // all students subscribed to this course
+                criterion(typeIndex(StudentSubscribed.NAME), courseIdIndex(cmd.courseId())),
+                // all courses this student subscribed to
+                criterion(typeIndex(StudentSubscribed.NAME), studentIdIndex(cmd.studentId())),
+                // all students unsubscribed from this course
+                criterion(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(cmd.courseId())),
+                // all courses this student unsubscribed from
+                criterion(typeIndex(StudentUnsubscribed.NAME), studentIdIndex(cmd.studentId())));
     }
 
     @Override
@@ -54,11 +69,12 @@ public class SubscribeStudentCommandHandler
     @Override
     public State source(Object event, State state) {
         return switch (event) {
-            case StudentEnrolledFaculty e -> state.withStudentEnrolled(e);
-            case CourseCreated e -> state.withCourseCreated(e);
-            case CourseCapacityChanged e -> state.withCourseCapacityChanged(e);
-            case StudentSubscribed e -> state.withStudentSubscribed(e);
-            case StudentUnsubscribed e -> state.withStudentUnsubscribed(e);
+            case StudentEnrolledFaculty e -> state.withStudentId(e.id());
+            case CourseCreated e -> state.withCourseId(e.id())
+                                         .withCourseCapacity(e.capacity());
+            case CourseCapacityChanged e -> state.withCourseCapacity(e.capacity());
+            case StudentSubscribed e -> state.withStudentSubscribed(e.studentId(), e.courseId());
+            case StudentUnsubscribed e -> state.withStudentUnsubscribed(e.studentId(), e.courseId());
             default -> throw new RuntimeException("No handler for this event");
         };
     }
@@ -76,36 +92,36 @@ public class SubscribeStudentCommandHandler
             return new State(null, null, 0, 0, 0, false);
         }
 
-        public State withCourseCreated(CourseCreated evt) {
-            return new State(studentId, evt.id(), noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, evt.capacity(), alreadySubscribed);
+        public State withCourseId(String courseId) {
+            return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
+        }
+        
+        public State withCourseCapacity(int courseCapacity) {
+            return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
         }
 
-        public State withStudentEnrolled(StudentEnrolledFaculty evt) {
-            return new State(evt.id(), courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
+        public State withStudentId(String studentId) {
+            return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
         }
 
-        public State withStudentSubscribed(StudentSubscribed evt) {
-            if (evt.studentId().equals(studentId) && evt.courseId().equals(courseId)) {
+        public State withStudentSubscribed(String enrolledStudentId, String enrolledCourseId) {
+            if (enrolledStudentId.equals(studentId) && enrolledCourseId.equals(courseId)) {
                 return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, true);
-            } else if (evt.studentId().equals(studentId)) {
+            } else if (enrolledStudentId.equals(studentId)) {
                 return new State(studentId, courseId, noOfCoursesStudentSubscribed + 1, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
             } else {
                 return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse + 1, courseCapacity, alreadySubscribed);
             }
         }
 
-        public State withStudentUnsubscribed(StudentUnsubscribed evt) {
-            if (evt.studentId().equals(studentId) && evt.courseId().equals(courseId)) {
+        public State withStudentUnsubscribed(String enrolledStudentId, String enrolledCourseId) {
+            if (enrolledStudentId.equals(studentId) && enrolledCourseId.equals(courseId)) {
                 return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, false);
-            } else if (evt.studentId().equals(studentId)) {
+            } else if (enrolledStudentId.equals(studentId)) {
                 return new State(studentId, courseId, noOfCoursesStudentSubscribed - 1, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
             } else {
                 return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse - 1, courseCapacity, alreadySubscribed);
             }
-        }
-
-        public State withCourseCapacityChanged(CourseCapacityChanged evt) {
-            return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, evt.capacity(), alreadySubscribed);
         }
 
         public void assertStudentEnrolledFaculty() {
@@ -114,25 +130,25 @@ public class SubscribeStudentCommandHandler
             }
         }
 
-        private void assertStudentNotSubscribedToTooManyCourses() {
+        public void assertStudentNotSubscribedToTooManyCourses() {
             if (noOfCoursesStudentSubscribed == MAX_COURSES_PER_STUDENT) {
                 throw new RuntimeException("Student subscribed to too many courses");
             }
         }
 
-        private void assertEnoughVacantSpotsInCourse() {
+        public void assertEnoughVacantSpotsInCourse() {
             if (noOfStudentsSubscribedToCourse == courseCapacity) {
                 throw new RuntimeException("Course is fully booked");
             }
         }
 
-        private void assertStudentNotAlreadySubscribed() {
+        public void assertStudentNotAlreadySubscribed() {
             if (alreadySubscribed) {
                 throw new RuntimeException("Student already subscribed to this course");
             }
         }
 
-        private void assertCourseExists() {
+        public void assertCourseExists() {
             if (courseId == null) {
                 throw new RuntimeException("Course with given id does not exist");
             }
