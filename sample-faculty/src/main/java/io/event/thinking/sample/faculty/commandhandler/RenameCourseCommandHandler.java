@@ -16,21 +16,25 @@ public class RenameCourseCommandHandler implements DcbCommandHandler<RenameCours
      */
     @Override
     public Criteria criteria(RenameCourse command) {
+        // TODO: Build criteria
         return null;
     }
 
     @Override
     public State initialState() {
-        return null;
+        // TODO: Construct initial state
+        return new State();
     }
 
     @Override
     public State source(Object event, State state) {
-        return null;
+        // TODO: Source state from events
+        return state;
     }
 
     @Override
     public List<Event> handle(RenameCourse command, State state) {
+        // TODO: Handle the command
         return List.of();
     }
 
