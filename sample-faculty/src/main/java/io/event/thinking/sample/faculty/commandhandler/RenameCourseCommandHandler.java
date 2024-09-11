@@ -16,10 +16,18 @@ import static io.event.thinking.sample.faculty.commandhandler.Indices.courseIdIn
 
 public class RenameCourseCommandHandler implements DcbCommandHandler<RenameCourse, RenameCourseCommandHandler.State> {
 
+    /*
+        Filter for events, that state whether
+        - this course has been created
+        - this course has been renamed
+     */
     @Override
     public Criteria criteria(RenameCourse command) {
-        return Criteria.criteria(criterion(typeIndex(CourseCreated.NAME), courseIdIndex(command.courseId())),
-                                 criterion(typeIndex(CourseRenamed.NAME), courseIdIndex(command.courseId())));
+        return Criteria.criteria(
+                // this course has been created
+                criterion(typeIndex(CourseCreated.NAME), courseIdIndex(command.courseId())),
+                // this course has been renamed
+                criterion(typeIndex(CourseRenamed.NAME), courseIdIndex(command.courseId())));
     }
 
     @Override
@@ -30,7 +38,7 @@ public class RenameCourseCommandHandler implements DcbCommandHandler<RenameCours
     @Override
     public State source(Object event, State state) {
         return switch (event) {
-            case CourseCreated e -> state.withCourseCreated(e);
+            case CourseCreated e -> state.withCourseCreated(e.id(), e.name());
             case CourseRenamed e -> state.withCourseName(e.newName());
             default -> throw new RuntimeException("No handler for this event");
         };
@@ -42,7 +50,9 @@ public class RenameCourseCommandHandler implements DcbCommandHandler<RenameCours
             throw new RuntimeException("Course already has this name");
         }
 
-        state.assertCourseExists();
+        if (state.courseId == null) {
+            throw new RuntimeException("Course with given id does not exist");
+        }
 
         return List.of(event(new CourseRenamed(command.courseId(), command.newName()),
                              typeIndex(CourseRenamed.NAME),
@@ -55,18 +65,12 @@ public class RenameCourseCommandHandler implements DcbCommandHandler<RenameCours
             return new State(null, null);
         }
 
-        public State withCourseCreated(CourseCreated evt) {
-            return new State(evt.id(), evt.name());
+        public State withCourseCreated(String courseId, String courseName) {
+            return new State(courseId, courseName);
         }
 
         public State withCourseName(String courseName) {
             return new State(courseId, courseName);
-        }
-
-        public void assertCourseExists() {
-            if (courseId == null) {
-                throw new RuntimeException("Course with given id does not exist");
-            }
         }
     }
 }

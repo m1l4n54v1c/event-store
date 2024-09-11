@@ -23,11 +23,21 @@ import static java.util.Collections.emptyList;
 public class ChangeCourseCapacityCommandHandler
         implements DcbCommandHandler<ChangeCourseCapacity, ChangeCourseCapacityCommandHandler.State> {
 
+    /*
+        We need all events, that show
+        - this course has been created
+        - any student has subscribed to this course
+        - any student has unsubscribed from this course
+     */
     @Override
     public Criteria criteria(ChangeCourseCapacity command) {
-        return Criteria.criteria(criterion(typeIndex(CourseCreated.NAME), courseIdIndex(command.courseId())),
-                                 criterion(typeIndex(StudentSubscribed.NAME), courseIdIndex(command.courseId())),
-                                 criterion(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(command.courseId())));
+        return Criteria.criteria(
+                // this course has been created
+                criterion(typeIndex(CourseCreated.NAME), courseIdIndex(command.courseId())),
+                // any student has subscribed to this course
+                criterion(typeIndex(StudentSubscribed.NAME), courseIdIndex(command.courseId())),
+                // any student has unsubscribed from this course
+                criterion(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(command.courseId())));
     }
 
     @Override
