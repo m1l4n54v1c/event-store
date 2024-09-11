@@ -18,14 +18,22 @@ import static io.event.thinking.sample.faculty.commandhandler.Indices.studentIdI
 public class UnsubscribeStudentCommandHandler implements
         DcbCommandHandler<UnsubscribeStudent, UnsubscribeStudentCommandHandler.State> {
 
+    /*
+        We need all events, that show
+        - this specific student subscribed to this specific course
+        - this specific student unsubscribed from this specific course
+     */
     @Override
     public Criteria criteria(UnsubscribeStudent cmd) {
-        return Criteria.criteria(criterion(typeIndex(StudentSubscribed.NAME),
-                                           studentIdIndex(cmd.studentId()),
-                                           courseIdIndex(cmd.courseId())),
-                                 criterion(typeIndex(StudentUnsubscribed.NAME),
-                                           studentIdIndex(cmd.studentId()),
-                                           courseIdIndex(cmd.courseId())));
+        return Criteria.criteria(
+                // this student subscribed to this course
+                criterion(typeIndex(StudentSubscribed.NAME),
+                          studentIdIndex(cmd.studentId()),
+                          courseIdIndex(cmd.courseId())),
+                // this student unsubscribed from this course
+                criterion(typeIndex(StudentUnsubscribed.NAME),
+                          studentIdIndex(cmd.studentId()),
+                          courseIdIndex(cmd.courseId())));
     }
 
     @Override
