@@ -92,35 +92,47 @@ public class SubscribeStudentCommandHandler
             return new State(null, null, 0, 0, 0, false);
         }
 
+        public State withStudentId(String studentId) {
+            return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
+        }
+
         public State withCourseId(String courseId) {
             return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
         }
-        
+
+        public State withNoOfCoursesStudentSubscribed(int noOfCoursesStudentSubscribed) {
+            return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
+        }
+
+        public State withNoOfStudentsSubscribedToCourse(int noOfStudentsSubscribedToCourse) {
+            return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
+        }
+
         public State withCourseCapacity(int courseCapacity) {
             return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
         }
 
-        public State withStudentId(String studentId) {
+        public State withAlreadySubscribed(boolean alreadySubscribed) {
             return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
         }
 
         public State withStudentSubscribed(String enrolledStudentId, String enrolledCourseId) {
             if (enrolledStudentId.equals(studentId) && enrolledCourseId.equals(courseId)) {
-                return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, true);
+                return withAlreadySubscribed(true);
             } else if (enrolledStudentId.equals(studentId)) {
-                return new State(studentId, courseId, noOfCoursesStudentSubscribed + 1, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
+                return withNoOfCoursesStudentSubscribed(noOfCoursesStudentSubscribed + 1);
             } else {
-                return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse + 1, courseCapacity, alreadySubscribed);
+                return withNoOfStudentsSubscribedToCourse(noOfStudentsSubscribedToCourse + 1);
             }
         }
 
         public State withStudentUnsubscribed(String enrolledStudentId, String enrolledCourseId) {
             if (enrolledStudentId.equals(studentId) && enrolledCourseId.equals(courseId)) {
-                return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse, courseCapacity, false);
+                return withAlreadySubscribed(false);
             } else if (enrolledStudentId.equals(studentId)) {
-                return new State(studentId, courseId, noOfCoursesStudentSubscribed - 1, noOfStudentsSubscribedToCourse, courseCapacity, alreadySubscribed);
+                return withNoOfCoursesStudentSubscribed(noOfCoursesStudentSubscribed - 1);
             } else {
-                return new State(studentId, courseId, noOfCoursesStudentSubscribed, noOfStudentsSubscribedToCourse - 1, courseCapacity, alreadySubscribed);
+                return withNoOfStudentsSubscribedToCourse(noOfStudentsSubscribedToCourse - 1);
             }
         }
 
