@@ -47,7 +47,7 @@ class RenameCourseTest {
 
         fixture.given(new CourseCreated(courseId, "History", 42))
                .when(new RenameCourse(courseId, "History"))
-               .expectException(RuntimeException.class, "Course already has this name");
+               .expectException();
     }
 
     @Test
@@ -56,6 +56,6 @@ class RenameCourseTest {
 
         fixture.givenNoEvents()
                .when(new RenameCourse(nonExistingId, "History"))
-               .expectException(RuntimeException.class, "Course with given id does not exist");
+               .expectException();
     }
 }

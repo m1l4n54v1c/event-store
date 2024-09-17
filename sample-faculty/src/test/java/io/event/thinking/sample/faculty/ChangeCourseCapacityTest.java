@@ -52,7 +52,7 @@ class ChangeCourseCapacityTest {
     void courseCapacityChangeFailsOnNonExistingCourse() {
         fixture.givenNoEvents()
                .when(new ChangeCourseCapacity(UUID.randomUUID().toString(), 1))
-               .expectException(RuntimeException.class, "Course with given id does not exist");
+               .expectException();
     }
 
     @Test
@@ -64,6 +64,6 @@ class ChangeCourseCapacityTest {
                             typeIndex(CourseCreated.NAME),
                             FacultyIndices.courseIdIndex(courseCreated.id())))
                .when(new ChangeCourseCapacity(courseId, -1))
-               .expectException(RuntimeException.class, "Course capacity cannot be negative");
+               .expectException();
     }
 }

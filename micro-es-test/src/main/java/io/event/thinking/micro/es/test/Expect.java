@@ -35,4 +35,9 @@ public interface Expect {
      * @param message       the exception message
      */
     void expectException(Class<? extends Throwable> exceptionType, String message);
+
+    /**
+     * Assert that the command rose an exception.
+     */
+    void expectException();
 }
