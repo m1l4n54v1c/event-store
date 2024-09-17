@@ -1,7 +1,6 @@
 package io.event.thinking.sample.faculty.commandhandler;
 
 import io.event.thinking.eventstore.api.Criteria;
-import io.event.thinking.eventstore.api.Criterion;
 import io.event.thinking.micro.es.DcbCommandHandler;
 import io.event.thinking.micro.es.Event;
 import io.event.thinking.sample.faculty.api.command.SubscribeStudent;
@@ -32,21 +31,21 @@ public class SubscribeStudentCommandHandler
      */
     @Override
     public Criteria criteria(SubscribeStudent cmd) {
-        return Criteria.anyOf(
+        return anyOf(
                 // this student has enrolled
-                Criterion.allOf(typeIndex(StudentEnrolledFaculty.NAME), studentIdIndex(cmd.studentId())),
+                allOf(typeIndex(StudentEnrolledFaculty.NAME), studentIdIndex(cmd.studentId())),
                 // this course has been created
-                Criterion.allOf(typeIndex(CourseCreated.NAME), courseIdIndex(cmd.courseId())),
+                allOf(typeIndex(CourseCreated.NAME), courseIdIndex(cmd.courseId())),
                 // the capacity of this course has been changed
-                Criterion.allOf(typeIndex(CourseCapacityChanged.NAME), courseIdIndex(cmd.courseId())),
+                allOf(typeIndex(CourseCapacityChanged.NAME), courseIdIndex(cmd.courseId())),
                 // all students subscribed to this course
-                Criterion.allOf(typeIndex(StudentSubscribed.NAME), courseIdIndex(cmd.courseId())),
+                allOf(typeIndex(StudentSubscribed.NAME), courseIdIndex(cmd.courseId())),
                 // all courses this student subscribed to
-                Criterion.allOf(typeIndex(StudentSubscribed.NAME), studentIdIndex(cmd.studentId())),
+                allOf(typeIndex(StudentSubscribed.NAME), studentIdIndex(cmd.studentId())),
                 // all students unsubscribed from this course
-                Criterion.allOf(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(cmd.courseId())),
+                allOf(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(cmd.courseId())),
                 // all courses this student unsubscribed from
-                Criterion.allOf(typeIndex(StudentUnsubscribed.NAME), studentIdIndex(cmd.studentId())));
+                allOf(typeIndex(StudentUnsubscribed.NAME), studentIdIndex(cmd.studentId())));
     }
 
     @Override

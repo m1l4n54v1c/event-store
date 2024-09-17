@@ -1,9 +1,8 @@
 package io.event.thinking.sample.faculty.commandhandler;
 
 import io.event.thinking.eventstore.api.Criteria;
-import io.event.thinking.eventstore.api.Criterion;
-import io.event.thinking.micro.es.Event;
 import io.event.thinking.micro.es.DcbCommandHandler;
+import io.event.thinking.micro.es.Event;
 import io.event.thinking.sample.faculty.api.command.UnsubscribeStudent;
 import io.event.thinking.sample.faculty.api.event.StudentSubscribed;
 import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
@@ -27,13 +26,13 @@ public class UnsubscribeStudentCommandHandler implements
      */
     @Override
     public Criteria criteria(UnsubscribeStudent cmd) {
-        return Criteria.anyOf(
+        return anyOf(
                 // this student subscribed to this course
-                Criterion.allOf(typeIndex(StudentSubscribed.NAME),
+                allOf(typeIndex(StudentSubscribed.NAME),
                                 studentIdIndex(cmd.studentId()),
                                 courseIdIndex(cmd.courseId())),
                 // this student unsubscribed from this course
-                Criterion.allOf(typeIndex(StudentUnsubscribed.NAME),
+                allOf(typeIndex(StudentUnsubscribed.NAME),
                                 studentIdIndex(cmd.studentId()),
                                 courseIdIndex(cmd.courseId())));
     }
@@ -56,8 +55,8 @@ public class UnsubscribeStudentCommandHandler implements
     @Override
     public State source(Object event, State state) {
         return switch (event) {
-            case StudentSubscribed _ -> state.withSubscribed(true);
-            case StudentUnsubscribed _ -> state.withSubscribed(false);
+            case StudentSubscribed e -> state.withSubscribed(true);
+            case StudentUnsubscribed e -> state.withSubscribed(false);
             // since we explicitly define criteria, we don't expect anything else
             default -> throw new RuntimeException("No handler for this event");
         };
