@@ -15,8 +15,8 @@ import java.util.List;
 import static io.event.thinking.eventstore.api.Criterion.criterion;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Indices.typeIndex;
-import static io.event.thinking.sample.faculty.commandhandler.Indices.courseIdIndex;
-import static io.event.thinking.sample.faculty.commandhandler.Indices.studentIdIndex;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.courseIdIndex;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.studentIdIndex;
 
 public class SubscribeStudentCommandHandler
         implements DcbCommandHandler<SubscribeStudent, SubscribeStudentCommandHandler.State> {
