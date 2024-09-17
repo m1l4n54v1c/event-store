@@ -13,11 +13,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static io.event.thinking.eventstore.api.Criteria.anyOf;
 import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Indices.typeIndex;
-import static io.event.thinking.sample.faculty.commandhandler.Indices.courseIdIndex;
-import static io.event.thinking.sample.faculty.commandhandler.Indices.studentIdIndex;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.courseIdIndex;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.studentIdIndex;
 import static java.util.Collections.emptyList;
 
 public class ChangeCourseCapacityCommandHandler

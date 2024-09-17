@@ -9,10 +9,11 @@ import io.event.thinking.sample.faculty.api.event.CourseRenamed;
 
 import java.util.List;
 
+import static io.event.thinking.eventstore.api.Criteria.anyOf;
 import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Indices.typeIndex;
-import static io.event.thinking.sample.faculty.commandhandler.Indices.courseIdIndex;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.courseIdIndex;
 
 public class RenameCourseCommandHandler implements DcbCommandHandler<RenameCourse, RenameCourseCommandHandler.State> {
 
