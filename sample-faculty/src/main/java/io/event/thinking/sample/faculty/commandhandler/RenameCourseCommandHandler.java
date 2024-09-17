@@ -39,6 +39,6 @@ public class RenameCourseCommandHandler implements DcbCommandHandler<RenameCours
     }
 
     public record State() {
-
+        // TODO: Implement the state
     }
 }

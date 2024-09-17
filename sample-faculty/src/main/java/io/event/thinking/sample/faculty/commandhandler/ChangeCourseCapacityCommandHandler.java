@@ -40,6 +40,6 @@ public class ChangeCourseCapacityCommandHandler implements DcbCommandHandler<Cha
     }
 
     public record State() {
-
+        // TODO: Implement the state
     }
 }
