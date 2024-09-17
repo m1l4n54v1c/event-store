@@ -4,7 +4,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static io.event.thinking.eventstore.api.Criteria.criteria;
+import static io.event.thinking.eventstore.api.Criteria.anyOf;
 import static java.util.Collections.emptySet;
 
 /**
@@ -67,7 +67,7 @@ public interface EventStore {
      * @return events with the current consistencyMarker of the Event Store
      */
     default MarkedEvents read(long fromSequence) {
-        return read(fromSequence, criteria(emptySet()));
+        return read(fromSequence, anyOf(emptySet()));
     }
 
     /**

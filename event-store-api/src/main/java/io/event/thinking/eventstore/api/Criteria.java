@@ -17,7 +17,7 @@ public record Criteria(Set<Criterion> criteria) {
      * @param criteria an array of criterions
      * @return newly created {@link Criteria}
      */
-    public static Criteria criteria(Criterion... criteria) {
+    public static Criteria anyOf(Criterion... criteria) {
         return new Criteria(Set.of(criteria));
     }
 
@@ -27,7 +27,7 @@ public record Criteria(Set<Criterion> criteria) {
      * @param criteria a set of criterions
      * @return newly created {@link Criteria}
      */
-    public static Criteria criteria(Set<Criterion> criteria) {
+    public static Criteria anyOf(Set<Criterion> criteria) {
         return new Criteria(criteria);
     }
 

@@ -1,6 +1,7 @@
 package io.event.thinking.sample.faculty.commandhandler;
 
 import io.event.thinking.eventstore.api.Criteria;
+import io.event.thinking.eventstore.api.Criterion;
 import io.event.thinking.micro.es.Event;
 import io.event.thinking.micro.es.DcbCommandHandler;
 import io.event.thinking.sample.faculty.api.command.UnsubscribeStudent;
@@ -9,7 +10,8 @@ import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 
 import java.util.List;
 
-import static io.event.thinking.eventstore.api.Criterion.criterion;
+import static io.event.thinking.eventstore.api.Criteria.anyOf;
+import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Indices.typeIndex;
 import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.courseIdIndex;
@@ -25,15 +27,15 @@ public class UnsubscribeStudentCommandHandler implements
      */
     @Override
     public Criteria criteria(UnsubscribeStudent cmd) {
-        return Criteria.criteria(
+        return Criteria.anyOf(
                 // this student subscribed to this course
-                criterion(typeIndex(StudentSubscribed.NAME),
-                          studentIdIndex(cmd.studentId()),
-                          courseIdIndex(cmd.courseId())),
+                Criterion.allOf(typeIndex(StudentSubscribed.NAME),
+                                studentIdIndex(cmd.studentId()),
+                                courseIdIndex(cmd.courseId())),
                 // this student unsubscribed from this course
-                criterion(typeIndex(StudentUnsubscribed.NAME),
-                          studentIdIndex(cmd.studentId()),
-                          courseIdIndex(cmd.courseId())));
+                Criterion.allOf(typeIndex(StudentUnsubscribed.NAME),
+                                studentIdIndex(cmd.studentId()),
+                                courseIdIndex(cmd.courseId())));
     }
 
     @Override

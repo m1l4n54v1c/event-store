@@ -17,7 +17,7 @@ public record Criterion(Set<Index> indices) {
      * @param indices an array of indices
      * @return newly created {@link Criterion}
      */
-    public static Criterion criterion(Index... indices) {
+    public static Criterion allOf(Index... indices) {
         return new Criterion(Set.of(indices));
     }
 
@@ -27,7 +27,7 @@ public record Criterion(Set<Index> indices) {
      * @param indices a set of indices
      * @return newly created {@link Criterion}
      */
-    public static Criterion criterion(Set<Index> indices) {
+    public static Criterion allOf(Set<Index> indices) {
         return new Criterion(indices);
     }
 
