@@ -12,11 +12,12 @@ import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 
 import java.util.List;
 
-import static io.event.thinking.eventstore.api.Criterion.criterion;
+import static io.event.thinking.eventstore.api.Criteria.anyOf;
+import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Indices.typeIndex;
-import static io.event.thinking.sample.faculty.commandhandler.Indices.courseIdIndex;
-import static io.event.thinking.sample.faculty.commandhandler.Indices.studentIdIndex;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.courseIdIndex;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.studentIdIndex;
 
 public class SubscribeStudentCommandHandler
         implements DcbCommandHandler<SubscribeStudent, SubscribeStudentCommandHandler.State> {
@@ -30,21 +31,21 @@ public class SubscribeStudentCommandHandler
      */
     @Override
     public Criteria criteria(SubscribeStudent cmd) {
-        return Criteria.criteria(
+        return anyOf(
                 // this student has enrolled
-                criterion(typeIndex(StudentEnrolledFaculty.NAME), studentIdIndex(cmd.studentId())),
+                allOf(typeIndex(StudentEnrolledFaculty.NAME), studentIdIndex(cmd.studentId())),
                 // this course has been created
-                criterion(typeIndex(CourseCreated.NAME), courseIdIndex(cmd.courseId())),
+                allOf(typeIndex(CourseCreated.NAME), courseIdIndex(cmd.courseId())),
                 // the capacity of this course has been changed
-                criterion(typeIndex(CourseCapacityChanged.NAME), courseIdIndex(cmd.courseId())),
+                allOf(typeIndex(CourseCapacityChanged.NAME), courseIdIndex(cmd.courseId())),
                 // all students subscribed to this course
-                criterion(typeIndex(StudentSubscribed.NAME), courseIdIndex(cmd.courseId())),
+                allOf(typeIndex(StudentSubscribed.NAME), courseIdIndex(cmd.courseId())),
                 // all courses this student subscribed to
-                criterion(typeIndex(StudentSubscribed.NAME), studentIdIndex(cmd.studentId())),
+                allOf(typeIndex(StudentSubscribed.NAME), studentIdIndex(cmd.studentId())),
                 // all students unsubscribed from this course
-                criterion(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(cmd.courseId())),
+                allOf(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(cmd.courseId())),
                 // all courses this student unsubscribed from
-                criterion(typeIndex(StudentUnsubscribed.NAME), studentIdIndex(cmd.studentId())));
+                allOf(typeIndex(StudentUnsubscribed.NAME), studentIdIndex(cmd.studentId())));
     }
 
     @Override

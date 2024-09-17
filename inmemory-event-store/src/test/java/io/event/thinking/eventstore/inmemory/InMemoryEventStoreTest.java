@@ -1,5 +1,7 @@
 package io.event.thinking.eventstore.inmemory;
 
+import io.event.thinking.eventstore.api.Criteria;
+import io.event.thinking.eventstore.api.Criterion;
 import io.event.thinking.eventstore.api.InvalidConsistencyConditionException;
 import io.event.thinking.eventstore.api.MarkedEvents;
 import io.event.thinking.eventstore.api.SequencedEvent;
@@ -12,8 +14,8 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static io.event.thinking.eventstore.api.ConsistencyCondition.consistencyCondition;
-import static io.event.thinking.eventstore.api.Criteria.criteria;
-import static io.event.thinking.eventstore.api.Criterion.criterion;
+import static io.event.thinking.eventstore.api.Criteria.anyOf;
+import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.eventstore.api.SequencedEvent.sequencedEvent;
 import static io.event.thinking.eventstore.api.Index.index;
 import static io.event.thinking.eventstore.api.Event.event;
@@ -63,8 +65,8 @@ class InMemoryEventStoreTest {
         var index2 = index("key2", "value2");
         var event1 = event(emptyPayload(), index1);
         var event2 = event(emptyPayload(), index2);
-        var consistencyCondition1 = consistencyCondition(-1L, criteria(criterion(index1)));
-        var consistencyCondition2 = consistencyCondition(0L, criteria(criterion(index2)));
+        var consistencyCondition1 = consistencyCondition(-1L, Criteria.anyOf(Criterion.allOf(index1)));
+        var consistencyCondition2 = consistencyCondition(0L, Criteria.anyOf(Criterion.allOf(index2)));
 
         var appends = Flux.merge(eventStore.append(event1, consistencyCondition1),
                                  eventStore.append(event2, consistencyCondition2));
@@ -78,8 +80,8 @@ class InMemoryEventStoreTest {
         var index = index("key", "value");
         var event1 = event(emptyPayload(), index);
         var event2 = event(emptyPayload(), index);
-        var consistencyCondition1 = consistencyCondition(0L, criteria(criterion(index)));
-        var consistencyCondition2 = consistencyCondition(1L, criteria(criterion(index)));
+        var consistencyCondition1 = consistencyCondition(0L, Criteria.anyOf(Criterion.allOf(index)));
+        var consistencyCondition2 = consistencyCondition(1L, Criteria.anyOf(Criterion.allOf(index)));
 
         var appends = Flux.merge(eventStore.append(event1, consistencyCondition1),
                                  eventStore.append(event2, consistencyCondition2));
@@ -92,7 +94,7 @@ class InMemoryEventStoreTest {
     void multipleAppendsWithConflictingCondition() {
         var index = index("key", "value");
         var event = event(emptyPayload(), index);
-        var consistencyCondition = consistencyCondition(-1L, criteria(criterion(index)));
+        var consistencyCondition = consistencyCondition(-1L, Criteria.anyOf(Criterion.allOf(index)));
 
         var appends = Flux.merge(eventStore.append(event, consistencyCondition),
                                  eventStore.append(event, consistencyCondition));
@@ -103,7 +105,7 @@ class InMemoryEventStoreTest {
 
     @Test
     void appendWithNonExistingConsistencyMarker() {
-        StepVerifier.create(eventStore.append(event(emptyPayload()), consistencyCondition(100L, criteria())))
+        StepVerifier.create(eventStore.append(event(emptyPayload()), consistencyCondition(100L, Criteria.anyOf())))
                     .expectNext(0L)
                     .verifyComplete();
     }
@@ -139,7 +141,7 @@ class InMemoryEventStoreTest {
 
     @Test
     void readFromEmptyEventStore() {
-        var source = eventStore.read(criteria(criterion(index("key", "value"))));
+        var source = eventStore.read(Criteria.anyOf(Criterion.allOf(index("key", "value"))));
 
         assertEquals(0L, source.consistencyMarker());
         StepVerifier.create(source.flux())
@@ -162,7 +164,7 @@ class InMemoryEventStoreTest {
                     .expectNext(0L, 1L, 2L, 3L, 4L)
                     .verifyComplete();
 
-        var source1 = eventStore.read(criteria(criterion(index1)));
+        var source1 = eventStore.read(Criteria.anyOf(Criterion.allOf(index1)));
         assertEquals(5L, source1.consistencyMarker());
         StepVerifier.create(source1.flux())
                     .expectNext(sequencedEvent(0L, event1),
@@ -173,7 +175,7 @@ class InMemoryEventStoreTest {
         StepVerifier.create(eventStore.append(event2))
                     .expectNext(5L)
                     .verifyComplete();
-        var source2 = eventStore.read(criteria(criterion(index2)));
+        var source2 = eventStore.read(Criteria.anyOf(Criterion.allOf(index2)));
         assertEquals(6L, source2.consistencyMarker());
         StepVerifier.create(source2.flux())
                     .expectNext(sequencedEvent(1L, event2),

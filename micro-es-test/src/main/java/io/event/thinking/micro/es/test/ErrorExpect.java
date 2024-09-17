@@ -37,4 +37,9 @@ public class ErrorExpect implements Expect {
                     "Expected " + exceptionType + " with message '" + message + "' but got " + exception);
         }
     }
+
+    @Override
+    public void expectException() {
+        // everything is fine, nothing to assert
+    }
 }

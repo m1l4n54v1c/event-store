@@ -1,19 +1,20 @@
 package io.event.thinking.sample.faculty.commandhandler;
 
 import io.event.thinking.eventstore.api.Criteria;
-import io.event.thinking.micro.es.Event;
 import io.event.thinking.micro.es.DcbCommandHandler;
+import io.event.thinking.micro.es.Event;
 import io.event.thinking.sample.faculty.api.command.UnsubscribeStudent;
 import io.event.thinking.sample.faculty.api.event.StudentSubscribed;
 import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 
 import java.util.List;
 
-import static io.event.thinking.eventstore.api.Criterion.criterion;
+import static io.event.thinking.eventstore.api.Criteria.anyOf;
+import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Indices.typeIndex;
-import static io.event.thinking.sample.faculty.commandhandler.Indices.courseIdIndex;
-import static io.event.thinking.sample.faculty.commandhandler.Indices.studentIdIndex;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.courseIdIndex;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.studentIdIndex;
 
 public class UnsubscribeStudentCommandHandler implements
         DcbCommandHandler<UnsubscribeStudent, UnsubscribeStudentCommandHandler.State> {
@@ -25,15 +26,15 @@ public class UnsubscribeStudentCommandHandler implements
      */
     @Override
     public Criteria criteria(UnsubscribeStudent cmd) {
-        return Criteria.criteria(
+        return anyOf(
                 // this student subscribed to this course
-                criterion(typeIndex(StudentSubscribed.NAME),
-                          studentIdIndex(cmd.studentId()),
-                          courseIdIndex(cmd.courseId())),
+                allOf(typeIndex(StudentSubscribed.NAME),
+                                studentIdIndex(cmd.studentId()),
+                                courseIdIndex(cmd.courseId())),
                 // this student unsubscribed from this course
-                criterion(typeIndex(StudentUnsubscribed.NAME),
-                          studentIdIndex(cmd.studentId()),
-                          courseIdIndex(cmd.courseId())));
+                allOf(typeIndex(StudentUnsubscribed.NAME),
+                                studentIdIndex(cmd.studentId()),
+                                courseIdIndex(cmd.courseId())));
     }
 
     @Override
@@ -54,8 +55,8 @@ public class UnsubscribeStudentCommandHandler implements
     @Override
     public State source(Object event, State state) {
         return switch (event) {
-            case StudentSubscribed _ -> state.withSubscribed(true);
-            case StudentUnsubscribed _ -> state.withSubscribed(false);
+            case StudentSubscribed e -> state.withSubscribed(true);
+            case StudentUnsubscribed e -> state.withSubscribed(false);
             // since we explicitly define criteria, we don't expect anything else
             default -> throw new RuntimeException("No handler for this event");
         };

@@ -4,12 +4,12 @@ import io.event.thinking.eventstore.api.Index;
 
 import static io.event.thinking.eventstore.api.Index.index;
 
-public class Indices {
+public class FacultyIndices {
 
     public static final String STUDENT_ID = "studentId";
     public static final String COURSE_ID = "courseId";
 
-    private Indices() {
+    private FacultyIndices() {
 
     }
 

@@ -9,7 +9,7 @@ import io.event.thinking.sample.faculty.api.event.CourseRenamed;
 
 import java.util.List;
 
-import static io.event.thinking.eventstore.api.Criterion.criterion;
+import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Indices.typeIndex;
 import static io.event.thinking.sample.faculty.commandhandler.Indices.courseIdIndex;
@@ -23,11 +23,11 @@ public class RenameCourseCommandHandler implements DcbCommandHandler<RenameCours
      */
     @Override
     public Criteria criteria(RenameCourse command) {
-        return Criteria.criteria(
+        return anyOf(
                 // this course has been created
-                criterion(typeIndex(CourseCreated.NAME), courseIdIndex(command.courseId())),
+                allOf(typeIndex(CourseCreated.NAME), courseIdIndex(command.courseId())),
                 // this course has been renamed
-                criterion(typeIndex(CourseRenamed.NAME), courseIdIndex(command.courseId())));
+                allOf(typeIndex(CourseRenamed.NAME), courseIdIndex(command.courseId())));
     }
 
     @Override

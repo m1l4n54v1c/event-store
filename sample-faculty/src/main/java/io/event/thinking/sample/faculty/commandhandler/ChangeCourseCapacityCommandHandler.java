@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static io.event.thinking.eventstore.api.Criterion.criterion;
+import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.micro.es.Event.event;
 import static io.event.thinking.micro.es.Indices.typeIndex;
 import static io.event.thinking.sample.faculty.commandhandler.Indices.courseIdIndex;
@@ -31,13 +31,13 @@ public class ChangeCourseCapacityCommandHandler
      */
     @Override
     public Criteria criteria(ChangeCourseCapacity command) {
-        return Criteria.criteria(
+        return anyOf(
                 // this course has been created
-                criterion(typeIndex(CourseCreated.NAME), courseIdIndex(command.courseId())),
+                allOf(typeIndex(CourseCreated.NAME), courseIdIndex(command.courseId())),
                 // any student has subscribed to this course
-                criterion(typeIndex(StudentSubscribed.NAME), courseIdIndex(command.courseId())),
+                allOf(typeIndex(StudentSubscribed.NAME), courseIdIndex(command.courseId())),
                 // any student has unsubscribed from this course
-                criterion(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(command.courseId())));
+                allOf(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(command.courseId())));
     }
 
     @Override

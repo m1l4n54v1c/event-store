@@ -55,6 +55,11 @@ public class SuccessfulExpect implements Expect {
         throw new AssertionError("Expected exception " + exceptionType + " but got " + publishedEvents());
     }
 
+    @Override
+    public void expectException() {
+        throw new AssertionError("Expected exception but got " + publishedEvents());
+    }
+
     private List<Event> publishedEvents() {
         return eventStore.read(lastGiven + 1)
                          .flux()
