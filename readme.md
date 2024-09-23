@@ -46,20 +46,20 @@ In our case, those are events depicting whether the course capacity has changed 
 to a course. Let's see how to form a criteria for this use-case:
 
 ```java
-criteria(criterion(index("eventType", "CourseCapacityChanged"),
-                   index("courseId", "jdsj4")),
-         criterion(index("eventType", "StudentSubscribedToCourse"),
-                   index("courseId", "jdsj4")),
-         criterion(index("eventType", "StudentSubscribedToCourse"),
-                   index("studentId", "gfh3j")))
+anyOf(allOf(index("eventType", "CourseCapacityChanged"),
+            index("courseId", "jdsj4")),
+      allOf(index("eventType", "StudentSubscribedToCourse"),
+            index("courseId", "jdsj4")),
+      allOf(index("eventType", "StudentSubscribedToCourse"),
+            index("studentId", "gfh3j")))
 ```
 
 Another interesting scenario would be to check whether the student subscribed to a course. 
 
 ```java
-criteria(criterion(index("eventType", "StudentSubscribedToCourse"),
-                   index("studentId", "gfh3j"),
-                   index("courseId", "jdsj4")))
+anyOf(allOf(index("eventType", "StudentSubscribedToCourse"),
+            index("studentId", "gfh3j"),
+            index("courseId", "jdsj4")))
 ```
 
 ## _read_
