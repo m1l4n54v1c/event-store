@@ -11,7 +11,7 @@ import org.junit.jupiter.api.*;
 
 import java.util.UUID;
 
-import static io.event.thinking.sample.faculty.Indexing.multiEventIndexer;
+import static io.event.thinking.sample.faculty.Tagging.multiEventTagger;
 
 class UnsubscribeStudentTest {
 
@@ -21,7 +21,7 @@ class UnsubscribeStudentTest {
     void setUp() {
         fixture = new CommandHandlerFixture<>(UnsubscribeStudent.class,
                                               new UnsubscribeStudentCommandHandler(),
-                                              multiEventIndexer());
+                                              multiEventTagger());
     }
 
     @Test
@@ -30,7 +30,7 @@ class UnsubscribeStudentTest {
         var courseId = UUID.randomUUID().toString();
 
         fixture.given(new StudentEnrolledFaculty(studentId, "Novak", "Djokovic"),
-                      new CourseCreated(courseId, 1),
+                      new CourseCreated(courseId, "Tennis", 1),
                       new StudentSubscribed(studentId, courseId))
                .when(new UnsubscribeStudent(studentId, courseId))
                .expectEvents(new StudentUnsubscribed(studentId, courseId));

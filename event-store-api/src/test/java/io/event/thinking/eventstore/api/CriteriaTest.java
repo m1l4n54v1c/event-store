@@ -1,88 +1,86 @@
 package io.event.thinking.eventstore.api;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.Set;
 
-import static io.event.thinking.eventstore.api.Criteria.criteria;
-import static io.event.thinking.eventstore.api.Criterion.criterion;
-import static io.event.thinking.eventstore.api.Index.index;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.event.thinking.eventstore.api.Criterion.allOf;
+import static io.event.thinking.eventstore.api.Tag.tag;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CriteriaTest {
 
     @Test
-    void emptyCriteriaMatchWithNoIndices() {
-        var criteria = criteria();
+    void emptyCriteriaMatchWithNoTags() {
+        var criteria = Criteria.anyOf();
 
         assertTrue(criteria.matches());
     }
 
     @Test
-    void emptyCriteriaMatchWithIndices() {
-        var criteria = criteria();
+    void emptyCriteriaMatchWithTags() {
+        var criteria = Criteria.anyOf();
 
-        assertTrue(criteria.matches(index("key", "value")));
+        assertTrue(criteria.matches(tag("key", "value")));
     }
 
     @Test
-    void criteriaMatchWithNoIndices() {
-        var criteria = criteria(criterion(index("key", "value")));
+    void criteriaMatchWithNoTags() {
+        var criteria = Criteria.anyOf(Criterion.allOf(tag("key", "value")));
 
         assertFalse(criteria.matches());
     }
 
     @Test
-    void criteriaExactMatchWithIndex() {
-        var index = index("key", "value");
-        var criteria = criteria(criterion(index));
+    void criteriaExactMatchWithTag() {
+        var tag = tag("key", "value");
+        var criteria = Criteria.anyOf(Criterion.allOf(tag));
 
-        assertTrue(criteria.matches(index));
+        assertTrue(criteria.matches(tag));
     }
 
     @Test
-    void criteriaExactMatchWithIndices() {
-        var indices = Set.of(index("key1", "value1"), index("key2", "value2"));
-        var criteria = criteria(criterion(indices));
+    void criteriaExactMatchWithTags() {
+        var tags = Set.of(tag("key1", "value1"), tag("key2", "value2"));
+        var criteria = Criteria.anyOf(allOf(tags));
 
-        assertTrue(criteria.matches(indices));
+        assertTrue(criteria.matches(tags));
     }
 
     @Test
-    void criteriaDoesntMatchWithLessIndices() {
-        var index1 = index("key1", "value1");
-        var indices = Set.of(index1, index("key2", "value2"));
-        var criteria = criteria(criterion(indices));
+    void criteriaDoesntMatchWithLessTags() {
+        var tag1 = tag("key1", "value1");
+        var tags = Set.of(tag1, tag("key2", "value2"));
+        var criteria = Criteria.anyOf(allOf(tags));
 
-        assertFalse(criteria.matches(index1));
+        assertFalse(criteria.matches(tag1));
     }
 
     @Test
-    void criteriaMatchesWithMoreIndices() {
-        var index1 = index("key1", "value1");
-        var indices = Set.of(index1, index("key2", "value2"));
-        var criteria = criteria(criterion(index1));
+    void criteriaMatchesWithMoreTags() {
+        var tag1 = tag("key1", "value1");
+        var tags = Set.of(tag1, tag("key2", "value2"));
+        var criteria = Criteria.anyOf(Criterion.allOf(tag1));
 
-        assertTrue(criteria.matches(indices));
+        assertTrue(criteria.matches(tags));
     }
 
     @Test
-    void criteriaDoesntMatchWithDifferentIndices() {
-        var index1 = index("key1", "value1");
-        var index2 = index("key2", "value2");
-        var criteria = criteria(criterion(index1));
+    void criteriaDoesntMatchWithDifferentTags() {
+        var tag1 = tag("key1", "value1");
+        var tag2 = tag("key2", "value2");
+        var criteria = Criteria.anyOf(Criterion.allOf(tag1));
 
-        assertFalse(criteria.matches(index2));
+        assertFalse(criteria.matches(tag2));
     }
 
     @Test
-    void criteriaDoesntMatchWithOneCommonIndex() {
-        var index1 = index("key1", "value1");
-        var index2 = index("key2", "value2");
-        var index3 = index("key3", "value3");
-        var criteria = criteria(criterion(index1, index2));
+    void criteriaDoesntMatchWithOneCommonTag() {
+        var tag1 = tag("key1", "value1");
+        var tag2 = tag("key2", "value2");
+        var tag3 = tag("key3", "value3");
+        var criteria = Criteria.anyOf(Criterion.allOf(tag1, tag2));
 
-        assertFalse(criteria.matches(index1, index3));
+        assertFalse(criteria.matches(tag1, tag3));
     }
 }

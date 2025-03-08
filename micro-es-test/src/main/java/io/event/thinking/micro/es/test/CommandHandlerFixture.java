@@ -23,23 +23,23 @@ public class CommandHandlerFixture<T> {
     private final EventStore eventStore;
     private final Serializer serializer = new Serializer() {
     };
-    private final MultiEventIndexer indexers;
+    private final MultiEventTagger tagger;
 
     /**
      * Instantiates this fixture.
      *
-     * @param commandType       the type of the command
-     * @param commandHandler    the command handler
-     * @param multiEventIndexer the indexer
-     * @param <C>               the type of the command
-     * @param <S>               the type of the state
+     * @param commandType      the type of the command
+     * @param commandHandler   the command handler
+     * @param multiEventTagger the tagger
+     * @param <C>              the type of the command
+     * @param <S>              the type of the state
      */
     public <C, S> CommandHandlerFixture(Class<C> commandType,
                                         DcbCommandHandler<C, S> commandHandler,
-                                        MultiEventIndexer multiEventIndexer) {
+                                        MultiEventTagger multiEventTagger) {
         this.eventStore = new InMemoryEventStore();
         this.commandBus = new LocalCommandBus(eventStore, serializer);
-        this.indexers = multiEventIndexer;
+        this.tagger = multiEventTagger;
 
         commandBus.register(commandType, commandHandler);
     }
@@ -51,10 +51,10 @@ public class CommandHandlerFixture<T> {
      * @return {@link When} continuation
      */
     public When<T> given(Object... events) {
-        Event[] indexed = Arrays.stream(events)
-                                .map(event -> new Event(indexers.index(event), event))
-                                .toArray(Event[]::new);
-        return given(indexed);
+        Event[] tagged = Arrays.stream(events)
+                               .map(event -> new Event(tagger.tag(event), event))
+                               .toArray(Event[]::new);
+        return given(tagged);
     }
 
     /**
@@ -65,11 +65,11 @@ public class CommandHandlerFixture<T> {
      */
     public When<T> given(Event... events) {
         var eventList = Arrays.stream(events)
-                              .map(event -> event(event.indices(), serializer.serialize(event.payload())))
+                              .map(event -> event(event.tags(), serializer.serialize(event.payload())))
                               .toList();
         Long lastGiven = eventStore.append(eventList)
                                    .block();
-        return new When<>(commandBus, eventStore, serializer, indexers, lastGiven);
+        return new When<>(commandBus, eventStore, serializer, tagger, lastGiven);
     }
 
     /**
@@ -78,6 +78,6 @@ public class CommandHandlerFixture<T> {
      * @return {@link When} continuation
      */
     public When<T> givenNoEvents() {
-        return new When<>(commandBus, eventStore, serializer, indexers);
+        return new When<>(commandBus, eventStore, serializer, tagger);
     }
 }

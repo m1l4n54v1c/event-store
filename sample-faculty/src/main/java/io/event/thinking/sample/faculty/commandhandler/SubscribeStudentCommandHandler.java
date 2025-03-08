@@ -12,11 +12,12 @@ import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 
 import java.util.List;
 
-import static io.event.thinking.eventstore.api.Criterion.criterion;
+import static io.event.thinking.eventstore.api.Criteria.anyOf;
+import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.micro.es.Event.event;
-import static io.event.thinking.micro.es.Indices.typeIndex;
-import static io.event.thinking.sample.faculty.commandhandler.Indices.courseIdIndex;
-import static io.event.thinking.sample.faculty.commandhandler.Indices.studentIdIndex;
+import static io.event.thinking.micro.es.Tags.typeTag;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyTags.courseIdTag;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyTags.studentIdTag;
 
 public class SubscribeStudentCommandHandler
         implements DcbCommandHandler<SubscribeStudent, SubscribeStudentCommandHandler.State> {
@@ -30,21 +31,21 @@ public class SubscribeStudentCommandHandler
      */
     @Override
     public Criteria criteria(SubscribeStudent cmd) {
-        return Criteria.criteria(
+        return anyOf(
                 // this student has enrolled
-                criterion(typeIndex(StudentEnrolledFaculty.NAME), studentIdIndex(cmd.studentId())),
+                allOf(typeTag(StudentEnrolledFaculty.NAME), studentIdTag(cmd.studentId())),
                 // this course has been created
-                criterion(typeIndex(CourseCreated.NAME), courseIdIndex(cmd.courseId())),
+                allOf(typeTag(CourseCreated.NAME), courseIdTag(cmd.courseId())),
                 // the capacity of this course has been changed
-                criterion(typeIndex(CourseCapacityChanged.NAME), courseIdIndex(cmd.courseId())),
+                allOf(typeTag(CourseCapacityChanged.NAME), courseIdTag(cmd.courseId())),
                 // all students subscribed to this course
-                criterion(typeIndex(StudentSubscribed.NAME), courseIdIndex(cmd.courseId())),
+                allOf(typeTag(StudentSubscribed.NAME), courseIdTag(cmd.courseId())),
                 // all courses this student subscribed to
-                criterion(typeIndex(StudentSubscribed.NAME), studentIdIndex(cmd.studentId())),
+                allOf(typeTag(StudentSubscribed.NAME), studentIdTag(cmd.studentId())),
                 // all students unsubscribed from this course
-                criterion(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(cmd.courseId())),
+                allOf(typeTag(StudentUnsubscribed.NAME), courseIdTag(cmd.courseId())),
                 // all courses this student unsubscribed from
-                criterion(typeIndex(StudentUnsubscribed.NAME), studentIdIndex(cmd.studentId())));
+                allOf(typeTag(StudentUnsubscribed.NAME), studentIdTag(cmd.studentId())));
     }
 
     @Override
@@ -61,9 +62,9 @@ public class SubscribeStudentCommandHandler
         state.assertStudentNotSubscribedToTooManyCourses();
         StudentSubscribed payload = new StudentSubscribed(cmd.studentId(), cmd.courseId());
         return List.of(event(payload,
-                             typeIndex(StudentSubscribed.NAME),
-                             studentIdIndex(payload.studentId()),
-                             courseIdIndex(payload.courseId())));
+                             typeTag(StudentSubscribed.NAME),
+                             studentIdTag(payload.studentId()),
+                             courseIdTag(payload.courseId())));
     }
 
     @Override

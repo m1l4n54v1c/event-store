@@ -1,5 +1,7 @@
 package io.event.thinking.eventstore.inmemory;
 
+import io.event.thinking.eventstore.api.Criteria;
+import io.event.thinking.eventstore.api.Criterion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
@@ -7,10 +9,10 @@ import reactor.test.StepVerifier;
 import java.util.UUID;
 
 import static io.event.thinking.eventstore.api.ConsistencyCondition.consistencyCondition;
-import static io.event.thinking.eventstore.api.Criteria.criteria;
-import static io.event.thinking.eventstore.api.Criterion.criterion;
+import static io.event.thinking.eventstore.api.Criteria.anyOf;
+import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.eventstore.api.SequencedEvent.sequencedEvent;
-import static io.event.thinking.eventstore.api.Index.index;
+import static io.event.thinking.eventstore.api.Tag.tag;
 import static io.event.thinking.eventstore.api.Event.event;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -25,15 +27,15 @@ class InMemoryEventStoreUseCaseTest {
 
     @Test
     void aggregateUseCase() {
-        var aggregateIndex = index("aggregateId", UUID.randomUUID().toString());
-        var criteria = criteria(criterion(aggregateIndex));
+        var aggregateTag = tag("aggregateId", UUID.randomUUID().toString());
+        var criteria = Criteria.anyOf(Criterion.allOf(aggregateTag));
 
         var events = eventStore.read(criteria);
         assertEquals(0L, events.consistencyMarker());
         StepVerifier.create(events.flux())
                     .verifyComplete();
 
-        var evt1 = event(payload("evt1"), aggregateIndex);
+        var evt1 = event(payload("evt1"), aggregateTag);
         var append = eventStore.append(evt1, consistencyCondition(events.consistencyMarker(), criteria));
         StepVerifier.create(append)
                     .expectNext(0L)
@@ -45,7 +47,7 @@ class InMemoryEventStoreUseCaseTest {
                     .expectNext(sequencedEvent(0L, evt1))
                     .verifyComplete();
 
-        var evt2 = event(payload("evt2"), aggregateIndex);
+        var evt2 = event(payload("evt2"), aggregateTag);
         append = eventStore.append(evt2, consistencyCondition(events.consistencyMarker(), criteria));
         StepVerifier.create(append)
                     .expectNext(1L)
@@ -61,16 +63,16 @@ class InMemoryEventStoreUseCaseTest {
 
     @Test
     void dcbUseCase() {
-        var studentIndex = index("studentId", UUID.randomUUID().toString());
-        var courseIndex = index("courseId", UUID.randomUUID().toString());
+        var studentTag = tag("studentId", UUID.randomUUID().toString());
+        var courseTag = tag("courseId", UUID.randomUUID().toString());
 
-        var studentCriteria = criteria(criterion(studentIndex));
-        var courseCriteria = criteria(criterion(courseIndex));
-        var studentCourseCriteria = criteria(criterion(studentIndex, courseIndex));
+        var studentCriteria = Criteria.anyOf(Criterion.allOf(studentTag));
+        var courseCriteria = Criteria.anyOf(Criterion.allOf(courseTag));
+        var studentCourseCriteria = Criteria.anyOf(Criterion.allOf(studentTag, courseTag));
 
-        var studentCreated = event(payload("studentCreated"), studentIndex);
-        var courseCreated = event(payload("courseCreated"), courseIndex);
-        var studentEnrolledCourse = event(payload("studentEnrolledCourse"), studentIndex, courseIndex);
+        var studentCreated = event(payload("studentCreated"), studentTag);
+        var courseCreated = event(payload("courseCreated"), courseTag);
+        var studentEnrolledCourse = event(payload("studentEnrolledCourse"), studentTag, courseTag);
 
         var consistencyMarker = eventStore.read(studentCriteria).consistencyMarker();
         eventStore.append(studentCreated, consistencyCondition(consistencyMarker, studentCriteria)).block();

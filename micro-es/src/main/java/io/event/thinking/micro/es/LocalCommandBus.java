@@ -72,7 +72,7 @@ public class LocalCommandBus implements CommandBus {
 
     private Event deserialize(io.event.thinking.eventstore.api.Event e) {
         Object payload = serializer.deserialize(e.payload());
-        return Event.event(e.indices(), payload);
+        return Event.event(e.tags(), payload);
     }
 
     private List<io.event.thinking.eventstore.api.Event> serialize(List<Event> events) {
@@ -83,7 +83,7 @@ public class LocalCommandBus implements CommandBus {
 
     private io.event.thinking.eventstore.api.Event serialize(Event e) {
         byte[] payload = serializer.serialize(e.payload());
-        return event(e.indices(), payload);
+        return event(e.tags(), payload);
     }
 
     private Mono<Long> publishEvents(List<io.event.thinking.eventstore.api.Event> events,
