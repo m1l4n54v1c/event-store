@@ -16,15 +16,15 @@ public class SuccessfulExpect implements Expect {
     private final long lastGiven;
     private final Serializer serializer;
     private final EventStore eventStore;
-    private final MultiEventIndexer indexers;
+    private final MultiEventTagger tagger;
 
     SuccessfulExpect(Serializer serializer,
                      EventStore eventStore,
-                     MultiEventIndexer indexers,
+                     MultiEventTagger tagger,
                      long lastGiven) {
         this.serializer = serializer;
         this.eventStore = eventStore;
-        this.indexers = indexers;
+        this.tagger = tagger;
         this.lastGiven = lastGiven;
     }
 
@@ -37,10 +37,10 @@ public class SuccessfulExpect implements Expect {
 
     @Override
     public void expectEvents(Object... events) {
-        Event[] indexed = Arrays.stream(events)
-                                .map(event -> new Event(indexers.index(event), event))
-                                .toArray(Event[]::new);
-        expectEvents(indexed);
+        Event[] tagged = Arrays.stream(events)
+                               .map(event -> new Event(tagger.tag(event), event))
+                               .toArray(Event[]::new);
+        expectEvents(tagged);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class SuccessfulExpect implements Expect {
         return eventStore.read(lastGiven + 1)
                          .flux()
                          .map(SequencedEvent::event)
-                         .map(e -> new Event(e.indices(), serializer.deserialize(e.payload())))
+                         .map(e -> new Event(e.tags(), serializer.deserialize(e.payload())))
                          .collectList()
                          .block();
     }

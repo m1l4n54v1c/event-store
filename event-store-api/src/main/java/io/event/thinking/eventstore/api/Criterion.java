@@ -3,59 +3,59 @@ package io.event.thinking.eventstore.api;
 import java.util.Set;
 
 /**
- * A single criterion within {@link Criteria}. Contains a {@link Set} of {@link Index}s. When matching with another  set
- * of indices, all of the {@link Criterion}'s indices must be contained in the provided set  of indices. In other words,
- * we apply the AND boolean operand between these indices.
+ * A single criterion within {@link Criteria}. Contains a {@link Set} of {@link Tag}s. When matching with another  set
+ * of tags, all of the {@link Criterion}'s tags must be contained in the provided set of tags. In other words, we apply
+ * the AND boolean operand between these tags.
  *
- * @param indices a set of indices
+ * @param tags a set of tags
  */
-public record Criterion(Set<Index> indices) {
+public record Criterion(Set<Tag> tags) {
 
     /**
      * Factory method for {@link Criterion}.
      *
-     * @param indices an array of indices
+     * @param tags an array of tags
      * @return newly created {@link Criterion}
      */
-    public static Criterion allOf(Index... indices) {
-        return new Criterion(Set.of(indices));
+    public static Criterion allOf(Tag... tags) {
+        return new Criterion(Set.of(tags));
     }
 
     /**
      * Factory method for {@link Criterion}.
      *
-     * @param indices a set of indices
+     * @param tags a set of tags
      * @return newly created {@link Criterion}
      */
-    public static Criterion allOf(Set<Index> indices) {
-        return new Criterion(indices);
+    public static Criterion allOf(Set<Tag> tags) {
+        return new Criterion(tags);
     }
 
     /**
-     * Matches this criterion with given {@code indices}. This criterion matches given {@code indices} iff all the criterion's
-     * indices are contained in the given {@code indices}.
+     * Matches this criterion with given {@code tags}. This criterion matches given {@code tags} iff all the criterion's
+     * tags are contained in the given {@code tags}.
      *
-     * @param indices a set of indices
-     * @return {@code true} if the criterion matches given {@code indices}, {@code false} otherwise
+     * @param tags a set of tags
+     * @return {@code true} if the criterion matches given {@code tags}, {@code false} otherwise
      */
-    public boolean matches(Index... indices) {
-        return matches(Set.of(indices));
+    public boolean matches(Tag... tags) {
+        return matches(Set.of(tags));
     }
 
     /**
-     * Matches this criterion with given {@code indices}. This criterion matches given {@code indices} iff all the criterion's
-     * indices are contained in the given {@code indices}.
+     * Matches this criterion with given {@code tags}. This criterion matches given {@code tags} iff all the criterion's
+     * tags are contained in the given {@code tags}.
      *
-     * @param indices a set of indices
-     * @return {@code true} if the criterion matches given {@code indices}, {@code false} otherwise
+     * @param tags a set of tags
+     * @return {@code true} if the criterion matches given {@code tags}, {@code false} otherwise
      */
-    public boolean matches(Set<Index> indices) {
-        if (this.indices.isEmpty()) {
+    public boolean matches(Set<Tag> tags) {
+        if (this.tags.isEmpty()) {
             return true;
         }
-        if (indices.isEmpty()) {
+        if (tags.isEmpty()) {
             return false;
         }
-        return indices.containsAll(this.indices);
+        return tags.containsAll(this.tags);
     }
 }

@@ -8,14 +8,14 @@ import io.event.thinking.sample.faculty.api.event.StudentEnrolledFaculty;
 import io.event.thinking.sample.faculty.api.event.StudentSubscribed;
 import io.event.thinking.sample.faculty.api.event.StudentUnsubscribed;
 import io.event.thinking.sample.faculty.commandhandler.ChangeCourseCapacityCommandHandler;
-import io.event.thinking.sample.faculty.commandhandler.FacultyIndices;
+import io.event.thinking.sample.faculty.commandhandler.FacultyTags;
 import org.junit.jupiter.api.*;
 
 import java.util.UUID;
 
 import static io.event.thinking.micro.es.Event.event;
-import static io.event.thinking.micro.es.Indices.typeIndex;
-import static io.event.thinking.sample.faculty.Indexing.multiEventIndexer;
+import static io.event.thinking.micro.es.Tags.typeTag;
+import static io.event.thinking.sample.faculty.Tagging.multiEventTagger;
 
 class ChangeCourseCapacityTest {
 
@@ -25,7 +25,7 @@ class ChangeCourseCapacityTest {
     void setUp() {
         fixture = new CommandHandlerFixture<>(ChangeCourseCapacity.class,
                                               new ChangeCourseCapacityCommandHandler(),
-                                              multiEventIndexer());
+                                              multiEventTagger());
     }
 
     @Test
@@ -61,8 +61,8 @@ class ChangeCourseCapacityTest {
 
         CourseCreated courseCreated = new CourseCreated(courseId, "Math", 42);
         fixture.given(event(courseCreated,
-                            typeIndex(CourseCreated.NAME),
-                            FacultyIndices.courseIdIndex(courseCreated.id())))
+                            typeTag(CourseCreated.NAME),
+                            FacultyTags.courseIdTag(courseCreated.id())))
                .when(new ChangeCourseCapacity(courseId, -1))
                .expectException();
     }

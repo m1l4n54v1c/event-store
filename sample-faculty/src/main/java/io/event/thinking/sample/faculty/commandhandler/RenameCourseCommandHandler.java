@@ -12,8 +12,8 @@ import java.util.List;
 import static io.event.thinking.eventstore.api.Criteria.anyOf;
 import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.micro.es.Event.event;
-import static io.event.thinking.micro.es.Indices.typeIndex;
-import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.courseIdIndex;
+import static io.event.thinking.micro.es.Tags.typeTag;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyTags.courseIdTag;
 
 public class RenameCourseCommandHandler implements DcbCommandHandler<RenameCourse, RenameCourseCommandHandler.State> {
 
@@ -26,9 +26,9 @@ public class RenameCourseCommandHandler implements DcbCommandHandler<RenameCours
     public Criteria criteria(RenameCourse command) {
         return anyOf(
                 // this course has been created
-                allOf(typeIndex(CourseCreated.NAME), courseIdIndex(command.courseId())),
+                allOf(typeTag(CourseCreated.NAME), courseIdTag(command.courseId())),
                 // this course has been renamed
-                allOf(typeIndex(CourseRenamed.NAME), courseIdIndex(command.courseId())));
+                allOf(typeTag(CourseRenamed.NAME), courseIdTag(command.courseId())));
     }
 
     @Override
@@ -56,8 +56,8 @@ public class RenameCourseCommandHandler implements DcbCommandHandler<RenameCours
         }
 
         return List.of(event(new CourseRenamed(command.courseId(), command.newName()),
-                             typeIndex(CourseRenamed.NAME),
-                             courseIdIndex(command.courseId())));
+                             typeTag(CourseRenamed.NAME),
+                             courseIdTag(command.courseId())));
     }
 
     public record State(String courseId, String courseName) {

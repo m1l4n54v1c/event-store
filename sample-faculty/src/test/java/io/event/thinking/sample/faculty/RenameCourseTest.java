@@ -9,7 +9,7 @@ import org.junit.jupiter.api.*;
 
 import java.util.UUID;
 
-import static io.event.thinking.sample.faculty.Indexing.multiEventIndexer;
+import static io.event.thinking.sample.faculty.Tagging.multiEventTagger;
 
 class RenameCourseTest {
 
@@ -19,7 +19,7 @@ class RenameCourseTest {
     void setUp() {
         fixture = new CommandHandlerFixture<>(RenameCourse.class,
                                               new RenameCourseCommandHandler(),
-                                              multiEventIndexer());
+                                              multiEventTagger());
     }
 
     @Test

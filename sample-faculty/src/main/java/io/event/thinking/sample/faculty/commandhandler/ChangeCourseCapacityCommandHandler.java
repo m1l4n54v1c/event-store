@@ -16,9 +16,9 @@ import java.util.List;
 import static io.event.thinking.eventstore.api.Criteria.anyOf;
 import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.micro.es.Event.event;
-import static io.event.thinking.micro.es.Indices.typeIndex;
-import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.courseIdIndex;
-import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.studentIdIndex;
+import static io.event.thinking.micro.es.Tags.typeTag;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyTags.courseIdTag;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyTags.studentIdTag;
 import static java.util.Collections.emptyList;
 
 public class ChangeCourseCapacityCommandHandler
@@ -34,11 +34,11 @@ public class ChangeCourseCapacityCommandHandler
     public Criteria criteria(ChangeCourseCapacity command) {
         return anyOf(
                 // this course has been created
-                allOf(typeIndex(CourseCreated.NAME), courseIdIndex(command.courseId())),
+                allOf(typeTag(CourseCreated.NAME), courseIdTag(command.courseId())),
                 // any student has subscribed to this course
-                allOf(typeIndex(StudentSubscribed.NAME), courseIdIndex(command.courseId())),
+                allOf(typeTag(StudentSubscribed.NAME), courseIdTag(command.courseId())),
                 // any student has unsubscribed from this course
-                allOf(typeIndex(StudentUnsubscribed.NAME), courseIdIndex(command.courseId())));
+                allOf(typeTag(StudentUnsubscribed.NAME), courseIdTag(command.courseId())));
     }
 
     @Override
@@ -67,17 +67,17 @@ public class ChangeCourseCapacityCommandHandler
         List<Event> events = new ArrayList<>();
         var courseCapacityChanged = new CourseCapacityChanged(command.courseId(), command.newCapacity());
         events.add(event(courseCapacityChanged,
-                         typeIndex(CourseCapacityChanged.NAME),
-                         courseIdIndex(courseCapacityChanged.id())));
+                         typeTag(CourseCapacityChanged.NAME),
+                         courseIdTag(courseCapacityChanged.id())));
         var subscribedStudents = state.subscribedStudents();
         if (command.newCapacity() < subscribedStudents.size()) {
             subscribedStudents.subList(command.newCapacity(), subscribedStudents.size())
                               .forEach(studentId -> {
                                   var studentSubscribed = new StudentUnsubscribed(studentId, state.courseId());
                                   events.add(event(studentSubscribed,
-                                                   typeIndex(StudentUnsubscribed.NAME),
-                                                   courseIdIndex(studentSubscribed.courseId()),
-                                                   studentIdIndex(studentSubscribed.studentId())));
+                                                   typeTag(StudentUnsubscribed.NAME),
+                                                   courseIdTag(studentSubscribed.courseId()),
+                                                   studentIdTag(studentSubscribed.studentId())));
                               });
         }
         return events;

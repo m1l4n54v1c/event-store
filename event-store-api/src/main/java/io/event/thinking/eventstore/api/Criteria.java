@@ -32,26 +32,26 @@ public record Criteria(Set<Criterion> criteria) {
     }
 
     /**
-     * If any criterion of criterions matches given {@code indices}, the whole criteria match them.
+     * If any criterion of criterions matches given {@code tags}, the whole criteria match them.
      *
-     * @param indices a set of indices
-     * @return {@code true} if the criteria matches the {@code indices}, {@code false} otherwise
+     * @param tags a set of tags
+     * @return {@code true} if the criteria matches the {@code tags}, {@code false} otherwise
      */
-    public boolean matches(Index... indices) {
-        return matches(Set.of(indices));
+    public boolean matches(Tag... tags) {
+        return matches(Set.of(tags));
     }
 
     /**
-     * If any criterion of criterions matches given {@code indices}, the whole criteria match them.
+     * If any criterion of criterions matches given {@code tags}, the whole criteria match them.
      *
-     * @param indices a set of indices
-     * @return {@code true} if the criteria matches the {@code indices}, {@code false} otherwise
+     * @param tags a set of tags
+     * @return {@code true} if the criteria matches the {@code tags}, {@code false} otherwise
      */
-    public boolean matches(Set<Index> indices) {
+    public boolean matches(Set<Tag> tags) {
         if (criteria.isEmpty()) {
             return true;
         }
         return criteria().stream()
-                         .anyMatch(c -> c.matches(indices));
+                         .anyMatch(c -> c.matches(tags));
     }
 }

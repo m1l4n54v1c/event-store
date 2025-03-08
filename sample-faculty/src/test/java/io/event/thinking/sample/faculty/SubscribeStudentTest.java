@@ -12,7 +12,7 @@ import org.junit.jupiter.api.*;
 
 import java.util.UUID;
 
-import static io.event.thinking.sample.faculty.Indexing.multiEventIndexer;
+import static io.event.thinking.sample.faculty.Tagging.multiEventTagger;
 
 class SubscribeStudentTest {
 
@@ -22,7 +22,7 @@ class SubscribeStudentTest {
     void setUp() {
         fixture = new CommandHandlerFixture<>(SubscribeStudent.class,
                                               new SubscribeStudentCommandHandler(),
-                                              multiEventIndexer());
+                                              multiEventTagger());
     }
 
     @Test

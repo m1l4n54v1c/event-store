@@ -17,24 +17,24 @@ public class When<T> {
     private final CommandBus commandBus;
     private final EventStore eventStore;
     private final Serializer serializer;
-    private final MultiEventIndexer indexers;
+    private final MultiEventTagger tagger;
 
     When(CommandBus commandBus,
          EventStore eventStore,
          Serializer serializer,
-         MultiEventIndexer indexers) {
-        this(commandBus, eventStore, serializer, indexers, -1L);
+         MultiEventTagger tagger) {
+        this(commandBus, eventStore, serializer, tagger, -1L);
     }
 
     When(CommandBus commandBus,
          EventStore eventStore,
          Serializer serializer,
-         MultiEventIndexer indexers,
+         MultiEventTagger tagger,
          Long lastGiven) {
         this.commandBus = commandBus;
         this.eventStore = eventStore;
         this.serializer = serializer;
-        this.indexers = indexers;
+        this.tagger = tagger;
         this.lastGiven = lastGiven;
     }
 
@@ -48,7 +48,7 @@ public class When<T> {
         try {
             commandBus.dispatch(command)
                       .block();
-            return new SuccessfulExpect(serializer, eventStore, indexers, lastGiven);
+            return new SuccessfulExpect(serializer, eventStore, tagger, lastGiven);
         } catch (Throwable t) {
             return new ErrorExpect(t);
         }

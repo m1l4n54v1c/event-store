@@ -12,9 +12,9 @@ import java.util.List;
 import static io.event.thinking.eventstore.api.Criteria.anyOf;
 import static io.event.thinking.eventstore.api.Criterion.allOf;
 import static io.event.thinking.micro.es.Event.event;
-import static io.event.thinking.micro.es.Indices.typeIndex;
-import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.courseIdIndex;
-import static io.event.thinking.sample.faculty.commandhandler.FacultyIndices.studentIdIndex;
+import static io.event.thinking.micro.es.Tags.typeTag;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyTags.courseIdTag;
+import static io.event.thinking.sample.faculty.commandhandler.FacultyTags.studentIdTag;
 
 public class UnsubscribeStudentCommandHandler implements
         DcbCommandHandler<UnsubscribeStudent, UnsubscribeStudentCommandHandler.State> {
@@ -28,13 +28,13 @@ public class UnsubscribeStudentCommandHandler implements
     public Criteria criteria(UnsubscribeStudent cmd) {
         return anyOf(
                 // this student subscribed to this course
-                allOf(typeIndex(StudentSubscribed.NAME),
-                                studentIdIndex(cmd.studentId()),
-                                courseIdIndex(cmd.courseId())),
+                allOf(typeTag(StudentSubscribed.NAME),
+                      studentIdTag(cmd.studentId()),
+                      courseIdTag(cmd.courseId())),
                 // this student unsubscribed from this course
-                allOf(typeIndex(StudentUnsubscribed.NAME),
-                                studentIdIndex(cmd.studentId()),
-                                courseIdIndex(cmd.courseId())));
+                allOf(typeTag(StudentUnsubscribed.NAME),
+                      studentIdTag(cmd.studentId()),
+                      courseIdTag(cmd.courseId())));
     }
 
     @Override
@@ -47,9 +47,9 @@ public class UnsubscribeStudentCommandHandler implements
         state.assertStudentSubscribed();
         StudentUnsubscribed payload = new StudentUnsubscribed(cmd.studentId(), cmd.courseId());
         return List.of(event(payload,
-                             typeIndex(StudentUnsubscribed.NAME),
-                             studentIdIndex(payload.studentId()),
-                             courseIdIndex(payload.courseId())));
+                             typeTag(StudentUnsubscribed.NAME),
+                             studentIdTag(payload.studentId()),
+                             courseIdTag(payload.courseId())));
     }
 
     @Override

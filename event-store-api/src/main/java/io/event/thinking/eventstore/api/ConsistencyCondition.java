@@ -30,22 +30,22 @@ public record ConsistencyCondition(long consistencyMarker, Criteria criteria) {
     }
 
     /**
-     * Matches given {@code indices} with the criteria.
+     * Matches given {@code tags} with the criteria.
      *
-     * @param indices a set of indices
+     * @param tags a set of tags
      * @return {@code true} if the condition is met, {@code} false otherwise
      */
-    public boolean matches(Index... indices) {
-        return matches(Set.of(indices));
+    public boolean matches(Tag... tags) {
+        return matches(Set.of(tags));
     }
 
     /**
-     * Matches given {@code indices} with the criteria.
+     * Matches given {@code tags} with the criteria.
      *
-     * @param indices a set of indices
+     * @param tags a set of tags
      * @return {@code true} if the condition is met, {@code} false otherwise
      */
-    public boolean matches(Set<Index> indices) {
-        return criteria.matches(indices);
+    public boolean matches(Set<Tag> tags) {
+        return criteria.matches(tags);
     }
 }
